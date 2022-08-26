@@ -108,7 +108,7 @@ struct Layer
         values vs;
         for(auto &n : neurons)
         {
-            vs.insert()
+            vs.insert(vs.end(), n.weights.begin(), n.weights.end());
         }
     }
 };
@@ -165,9 +165,9 @@ values ToDna() const
     }
 }
 
-void FromDna(const values& values)
+void FromDna(const values& input)
 {
-
+    
 }
 
 
