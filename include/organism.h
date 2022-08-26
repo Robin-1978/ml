@@ -2,8 +2,13 @@
 
 #include "cnn.h"
 
+namespace org
+{
+    
 class Organism
 {
 public:
     
 };
+
+}

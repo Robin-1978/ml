@@ -1,2 +1,2 @@
 # ml
-Example of ML
+Example of Machine Learning Model

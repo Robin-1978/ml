@@ -5,6 +5,11 @@
 #include <functional>
 #include <cmath>
 
+namespace org
+{
+    
+
+
 
 double tanh(double x)
 {
@@ -172,3 +177,5 @@ void FromDna(const values& input)
 
 
 };
+
+} // namespace org
