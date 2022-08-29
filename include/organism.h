@@ -1,14 +1,9 @@
 #pragma once
 
-#include "cnn.h"
+#include "ann.h"
 
-namespace org
-{
-    
 class Organism
 {
 public:
     
 };
-
-}

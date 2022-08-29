@@ -4,7 +4,6 @@
 #include <functional>
 
 #include <opencv2/opencv.hpp>
-#include <opencv2/freetype.hpp>
 
 #include <fmt/core.h>
 #include <fmt/color.h>
@@ -52,8 +51,6 @@ protected:
 
     virtual void OnRender(cv::Mat& image, unsigned width, unsigned height)
     {
-        cv::Ptr<cv::freetype::FreeType2> ft2;
-	    ft2 = cv::freetype::createFreeType2();
         
         cv::Point center(100, 100);//Declaring the center point
         int radius = 50; //Declaring the radius
