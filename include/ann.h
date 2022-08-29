@@ -1,11 +1,11 @@
 #pragma once
 
 #include <vector>
-#include <random>
 #include <functional>
 #include <cmath>
 #include <memory>
 #include <tuple>
+#include "random.h"
 
 namespace org
 {
@@ -138,6 +138,7 @@ namespace org
             {
                 vs.insert(vs.end(), n.weights.begin(), n.weights.end());
             }
+            return vs;
         }
     };
 
@@ -184,11 +185,11 @@ namespace org
         matrix Forward(const values &inputs) const
         {
             matrix result;
-            result.insert(result.end(), inputs.begin(), inputs.end());
+            result.push_back(inputs);
             for (auto &layer : layers)
             {
                 auto layerResult = layer(*result.rbegin());
-                result.insert(result.end(), layerResult.begin(), layerResult.end());
+                result.emplace_back(layerResult);
             }
             return result;
         }
@@ -205,7 +206,7 @@ namespace org
         {
             if (lables.size() != outputs.size())
             {
-                std::_Throw_range_error("");
+               throw std::range_error("Outputs must have the same number");
             }
             double loss = 0.0;
             for (auto i = 0u; i < lables.size(); i++)
@@ -239,6 +240,8 @@ namespace org
                     }
                 }
             }
+
+            return result;
         }
 
         void FromDna(const values &input)
