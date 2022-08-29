@@ -5,7 +5,7 @@
 #include <cmath>
 #include <memory>
 #include <tuple>
-#include "random.h"
+#include "dna.h"
 
 namespace org
 {
@@ -58,7 +58,7 @@ namespace org
 
             for (auto &w : weights)
             {
-                w = dbDist(e);
+                w = Random::Instance().RealInRange(0.0, 1.0);
             }
         }
 

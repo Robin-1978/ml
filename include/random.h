@@ -14,7 +14,7 @@ namespace org
             return instance;
         }
 
-        // [ ]
+        // [ ）
         template <typename T>
         T RealInRange(T minValue, T maxValue) 
         {
@@ -23,7 +23,7 @@ namespace org
             return dist(_gen);
         }
         
-        // [ )
+        // [ ]
         template <typename T>
         T IntInRange(T minValue, T maxValue) 
         {
