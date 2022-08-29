@@ -14,7 +14,7 @@ namespace org
             return instance;
         }
 
-        // [ ）
+        // [ )
         template <typename T>
         T RealInRange(T minValue, T maxValue) 
         {

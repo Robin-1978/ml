@@ -1,16 +1,20 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
+
 #include "random.h"
+
 
 namespace org
 {
 
-    struct Dna
+    template<typename T>
+    struct basic_dna
     {
-        std::vector<double> data;
+        std::vector<T> data;
 
-        Dna Corssover(const Dna &dna)
+        basic_dna Corssover(const basic_dna &dna)
         {
             auto pos = Random::Instance().IntInRange(std::size_t(0), dna.data.size() - 1);
             Dna child;
@@ -30,6 +34,31 @@ namespace org
                 data[pos2] = tmp;
             }
         }
+
+        std::ostream& operator<<(std::ostream& os) const
+        {
+            std::size_t size = data.size();
+            os.write(reinterpret_cast<char*>(&size), sizeof(size));
+            for(const auto&n : data)
+            {
+                os.write(reinterpret_cast<const char*>(&n), sizeof(n));
+            }
+            return os;
+        }
+
+        std::istream& operator >>(std::istream &is)
+        {
+            std::size_t size{};
+            is.read(reinterpret_cast<char*>(&size), sizeof(size));
+            data.resize(size);
+
+            for(auto n = 0u; n < size; ++n)
+            {
+                is.read(reinterpret_cast<char*>(&data[n]), sizeof(T));
+            }
+        }
     };
 
+    using dna = basic_dna<double>;
+    using fdna = basic_dna<float>;
 } // end org namespace
