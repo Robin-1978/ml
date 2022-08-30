@@ -7,21 +7,20 @@ namespace org
 {
     struct Evaluation
     {
-        std::vector<int> operator()(const std::vector<Dna> &dna)
+        std::vector<int> operator()(const std::vector<dna> &dna)
         {
             return Eval(dna);
         }
 
-        virtual std::vector<int> Eval(const std::vector<Dna> &dna)
+        virtual std::vector<int> Eval(const std::vector<dna> &dna)
         {
             return {};
         }
     };
 
-    template <typename T>
     struct Ga
     {
-        std::vector<Dna> dnas;
+        
     };
 
 }

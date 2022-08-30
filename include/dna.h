@@ -5,11 +5,10 @@
 
 #include "random.h"
 
-
 namespace org
 {
 
-    template<typename T>
+    template <typename T>
     struct basic_dna
     {
         std::vector<T> data;
@@ -17,12 +16,17 @@ namespace org
         basic_dna Corssover(const basic_dna &dna)
         {
             auto pos = Random::Instance().IntInRange(std::size_t(0), dna.data.size() - 1);
-            Dna child;
+            basic_dna child;
             child.data.insert(child.data.end(), dna.data.begin(), dna.data.begin() + pos);
             child.data.insert(child.data.end(), data.begin() + pos, data.end());
             return child;
         }
 
+        /**
+         * @brief mutations of the  dna
+         *
+         * @param probability 0.0 to 1.0
+         */
         void Mutation(double probability)
         {
             if (Random::Instance().RealInRange(0.0, 1.0) < probability)
@@ -35,27 +39,29 @@ namespace org
             }
         }
 
-        std::ostream& operator<<(std::ostream& os) const
+        std::ostream &operator<<(std::ostream &os) const
         {
             std::size_t size = data.size();
-            os.write(reinterpret_cast<char*>(&size), sizeof(size));
-            for(const auto&n : data)
+            os.write(reinterpret_cast<char *>(&size), sizeof(size));
+            for (const auto &n : data)
             {
-                os.write(reinterpret_cast<const char*>(&n), sizeof(n));
+                os.write(reinterpret_cast<const char *>(&n), sizeof(n));
             }
             return os;
         }
 
-        std::istream& operator >>(std::istream &is)
+        std::istream &operator>>(std::istream &is)
         {
             std::size_t size{};
-            is.read(reinterpret_cast<char*>(&size), sizeof(size));
+            is.read(reinterpret_cast<char *>(&size), sizeof(size));
             data.resize(size);
 
-            for(auto n = 0u; n < size; ++n)
+            for (auto n = 0u; n < size; ++n)
             {
-                is.read(reinterpret_cast<char*>(&data[n]), sizeof(T));
+                is.read(reinterpret_cast<char *>(&data[n]), sizeof(T));
             }
+
+            return is;
         }
     };
 

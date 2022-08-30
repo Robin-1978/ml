@@ -56,6 +56,9 @@ protected:
         int radius = 50; //Declaring the radius
         cv::Scalar line_Color(0, 0, 0);//Color of the circle
         int thickness = 2;//thickens of the line
+
+
+
         cv::circle(image, center,radius, line_Color, thickness);//Using circle()function to draw the line//
         cv::putText(image, "Press q to quit", cv::Point(100, 50), 0, 0.5, line_Color, 1);
         cv::putText(image, "Press q to quit", cv::Point(100, 100), 1, 0.5, line_Color, thickness, cv::LINE_AA);
@@ -65,6 +68,7 @@ protected:
         cv::putText(image, "Press q to quit", cv::Point(100, 300), 5, 0.5, line_Color, thickness, cv::LINE_AA);
         cv::putText(image, "Press q to quit", cv::Point(100, 350), 6, 0.5, line_Color, thickness, cv::LINE_AA);
         cv::putText(image, "Press q to quit", cv::Point(100, 400), 7, 0.5, line_Color, thickness, cv::LINE_AA);
+
         //ft2->putText(image, "Press q to quit", cv::Point(100, 450), 18, line_Color, thickness, cv::LINE_AA, true);
     }
 

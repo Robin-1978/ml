@@ -6,42 +6,11 @@
 #include <memory>
 #include <tuple>
 #include "dna.h"
+#include "activation.h"
+#include "random.h"
 
 namespace org
 {
-    struct ActivationFunction
-    {
-        virtual double Fun(double x) = 0;
-        virtual double DFun(double y) = 0;
-
-        using ptr = std::shared_ptr<ActivationFunction>;
-    };
-
-    struct Tanh : public ActivationFunction
-    {
-        double Fun(double x) override
-        {
-            return std::tanh(x);
-        }
-
-        double DFun(double y) override
-        {
-            return 1 - y * y;
-        }
-    };
-
-    struct Sigmod : public ActivationFunction
-    {
-        double Fun(double x) override
-        {
-            return 1 / (1 + std::exp(-x));
-        }
-
-        double DFun(double y) override
-        {
-            return y * (1 - y);
-        }
-    };
 
     using values = std::vector<double>;
     using matrix = std::vector<values>;
@@ -50,15 +19,11 @@ namespace org
     {
         Neuron(const unsigned count)
         {
-            std::random_device rd;
-            std::default_random_engine e(rd());
-            std::uniform_real_distribution<double> dbDist(-1.0, 1.0);
-
             weights.resize(count + 1);
 
             for (auto &w : weights)
             {
-                w = Random::Instance().RealInRange(0.0, 1.0);
+                w = Random::Instance().RealInRange(-1.0, 1.0);
             }
         }
 
@@ -81,27 +46,14 @@ namespace org
 
         unsigned Size() const { return weights.size(); }
 
-        values ToDna() const
-        {
-            return weights;
-        }
-
-        void FromDna(values::iterator &input)
-        {
-            for (auto &w : weights)
-            {
-                w = *input++;
-            }
-        }
-
         values weights;
     };
 
     struct Layer
     {
         std::vector<Neuron> neurons;
-        ActivationFunction::ptr activate;
-        Layer(const unsigned input, const unsigned output, ActivationFunction::ptr activate)
+        act::Activate::ptr activate;
+        Layer(const unsigned input, const unsigned output, act::Activate::ptr activate)
             : activate(std::move(activate))
         {
             for (auto n = 0u; n < output; ++n)
@@ -115,7 +67,7 @@ namespace org
             values results;
             for (auto &n : neurons)
             {
-                results.push_back(activate->Fun(n(inputs)));
+                results.push_back(activate->Calc(n(inputs)));
             }
 
             return results;
@@ -130,42 +82,35 @@ namespace org
             }
             return count;
         }
-
-        values ToDna() const
-        {
-            values vs;
-            for (auto &n : neurons)
-            {
-                vs.insert(vs.end(), n.weights.begin(), n.weights.end());
-            }
-            return vs;
-        }
     };
 
     struct Network
     {
-        using LayerInfo = std::tuple<unsigned, ActivationFunction::ptr>;
+        using LayerInfo = std::tuple<unsigned, act::Activate::ptr>;
         std::vector<Layer> layers;
 
-        void Construct(std::vector<LayerInfo> layerInfos)
+        Network() = default;
+        Network(std::initializer_list<LayerInfo> layerInfos)
         {
             if (layerInfos.size() < 2)
             {
                 throw std::invalid_argument("layerInfos must be at least 2");
             }
-            for (auto n = 0u; n < layerInfos.size() - 1; ++n)
+            for (auto i = layerInfos.begin(); i != layerInfos.end() - 1;)
             {
-                AddLayer(std::get<0>(layerInfos[n]), std::get<0>(layerInfos[n + 1]), std::get<1>(layerInfos[n + 1]));
+                auto input = std::get<0>(*i++);
+
+                AddLayer(input, std::get<0>(*i), std::get<1>(*i));
             }
         }
 
-        void AddLayer(unsigned input, unsigned output, ActivationFunction::ptr activate)
+        void AddLayer(unsigned input, unsigned output, act::Activate::ptr activate)
         {
             layers.clear();
             layers.emplace_back(input, output, activate);
         }
 
-        unsigned AppendLayer(unsigned output, ActivationFunction::ptr activate)
+        unsigned AppendLayer(unsigned output, act::Activate::ptr activate)
         {
             auto input = layers.back().neurons.size();
             layers.emplace_back(input, output, activate);
@@ -198,7 +143,7 @@ namespace org
         {
             for (auto n = 0u; n < labels.size(); n++)
             {
-                auto delta = (labels[n] - result.rbegin()->at(n)) * layers.rbegin()->activate->DFun(result.rbegin()->at(n));
+                auto delta = (labels[n] - result.rbegin()->at(n)) * layers.rbegin()->activate->Loss(result.rbegin()->at(n));
             }
         }
 
@@ -206,7 +151,7 @@ namespace org
         {
             if (lables.size() != outputs.size())
             {
-               throw std::range_error("Outputs must have the same number");
+                throw std::range_error("Outputs must have the same number");
             }
             double loss = 0.0;
             for (auto i = 0u; i < lables.size(); i++)
@@ -227,16 +172,16 @@ namespace org
             return count;
         }
 
-        values ToDna() const
+        dna ToDna() const
         {
-            values result;
+            dna result;
             for (auto &layer : layers)
             {
                 for (auto &neuron : layer.neurons)
                 {
                     for (auto &weight : neuron.weights)
                     {
-                        result.push_back(weight);
+                        result.data.push_back(weight);
                     }
                 }
             }
@@ -244,8 +189,33 @@ namespace org
             return result;
         }
 
-        void FromDna(const values &input)
+        void FromDna(const dna &input)
         {
+            if (input.data.size() != Size())
+            {
+                throw std::logic_error("FromDna: input data size mismatch");
+            }
+            auto it = input.data.begin();
+            for (auto &layer : layers)
+            {
+                for (auto &neuron : layer.neurons)
+                {
+                    for (auto &weight : neuron.weights)
+                    {
+                        weight = *it++;
+                    }
+                }
+            }
+        }
+
+        std::ostream &operator<<(std::ostream &os) const
+        {
+            return os;
+        }
+
+        std::istream &operator>>(std::istream &is)
+        {
+            return is;
         }
     };
 
