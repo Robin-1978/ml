@@ -9,31 +9,47 @@
 namespace org
 {
 
-    template <typename T, T precision = 0.000001>
+    constexpr double precision = 0.000001;
+
+    template <typename T>
     bool Is(const T &a, const T &b)
     {
         auto v = a - b;
         return v < -precision || v > precision ? false : true;
     }
 
+    template <typename T>
+    T Exceed(const T& v, const T& limit)
+    {
+        if(v < -limit) return v + 2 * limit;
+        if(v > limit) return v - 2 * limit;
+        return v;
+    }
+
+    template <typename T>
+    T Limit(const T& v, const T& limit)
+    {
+        if(v < -limit) return -limit;
+        if(v > limit) return limit;
+        return v;
+    }
+
+
+
     struct Position : Pos
     {
-        Position()
-        {
-            Random();
-        }
 
-        virtual void Random()
+        virtual void Random(double range)
         {
-            x = Random::Instance().RealInRange(-1.0, 1.0);
-            y = Random::Instance().RealInRange(-1.0, 1.0);
+            x = Random::Instance().RealInRange(-range, range);
+            y = Random::Instance().RealInRange(-range, range);
         }
 
         bool operator==(const Position &p) const
         {
             auto dx = x - p.x;
             auto dy = y - p.y;
-            if ((dx >= -precision && dx <= precision) || (dy >= -precision && dy <= precision))
+            if (Is(dx, p.x) && Is(dy, p.y))
             {
                 return true;
             }
@@ -45,15 +61,17 @@ namespace org
     {
         double yaw, speed;
 
-        void Step(double v , double w)
+        void Step(double v, double w)
         {
             auto dx = speed * std::cos(yaw);
             auto dy = speed * std::sin(yaw);
 
             speed += v;
 
-            if(speed < -1.0) speed = -1.0;
-            if(speed > 1.0) speed = 1.0;
+            if (speed < -1.0)
+                speed = -1.0;
+            if (speed > 1.0)
+                speed = 1.0;
 
             yaw += w;
             if (yaw <= -M_PI)
@@ -61,10 +79,10 @@ namespace org
             if (yaw > M_PI)
                 yaw -= 2 * M_PI;
 
-            dxx =  speed * std::cos(yaw);
-            dyy += speed * std::sin(yaw);
-            x += (dx + dxx)/2;
-            y += (dy + dyy)/2;
+            auto dxx = speed * std::cos(yaw);
+            auto dyy = speed * std::sin(yaw);
+            x += (dx + dxx) / 2;
+            y += (dy + dyy) / 2;
         }
     };
 
@@ -72,7 +90,7 @@ namespace org
     {
     };
 
-    class Organism : State
+    class Organism : public State
     {
     public:
     public:
@@ -81,11 +99,7 @@ namespace org
         {
         }
 
-        void Step()
-        {
-        }
-
-        Polar Decide(const std::vector<Food> &foods, const std::vector<Organism> &organizations)
+        values Decide(const std::vector<Food> &foods, const std::vector<Organism> &organizations)
         {
             values v;
             for (auto &f : foods)
@@ -100,9 +114,7 @@ namespace org
                 v.push_back(delta.x);
                 v.push_back(delta.y);
             }
-            auto decision = _brain(v);
-            Step(decision[0], decision[1])
-            // TODO:: Varify boundary
+            return _brain(v);
         }
 
     private:
@@ -110,12 +122,19 @@ namespace org
         org::Network _brain;
     };
 
-    class World
+    struct World
     {
-    public:
-        World(unsigned oc, unsigned fc, double ratio = 1000)
-            : _organisms(oc), _apples(fc)
+        World(unsigned oc, unsigned fc, double ratio = 100)
+            : _organisms(oc), _apples(fc), _ratio(ratio)
         {
+            for(auto& o : _organisms)
+            {
+                o.Random(ratio);
+            }   
+            for(auto& a : _apples)
+            {
+                a.Random(ratio);
+            }
         }
 
         void Step()
@@ -124,38 +143,41 @@ namespace org
             {
                 auto apples = GetApples(o);
                 auto organizations = GetOrganisms(o);
-                o.Decide(apples, organizations);
-            }
-
-            for (auto &o : _organisms)
-            {
-                o.yaw += o.steering / 4;
-                if (p.yaw <= -M_PI)
-                    p.yaw += 2 * M_PI;
-                if (p.yaw > M_PI)
-                    p.yaw -= 2 * M_PI;
-
-                o.rho += o.speed;
-                if (o.rho > 1.0)
-                    o.rho -= 1.0;
-                if (o.rho < -1.0)
-                    o.rho = -1.0;
-
-                o.theta += o.steering;
+                auto result = o.Decide(apples, _organisms);
+                o.Step(result[0], result[1]);
+                // limit
             }
         }
 
         std::vector<Food> GetApples(const Organism &o)
         {
+            std::sort(_apples.begin(), _apples.end(), [&o, this](const Food &a, const Food &b)->bool{
+                auto dxa = Exceed(o.x - a.x, _ratio);
+                auto dya = Exceed(o.y - a.y, _ratio);
+
+                auto dxb = Exceed(o.x - a.x, _ratio);
+                auto dyb = Exceed(o.y - a.y, _ratio);
+                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dxb);
+            });
+            return {_apples[0], _apples[1], _apples[2]};
         }
 
-        std::vector<Food> GetOrganisms(const Organism &o)
+        std::vector<Organism> GetOrganisms(const Organism &o)
         {
+            std::sort(_organisms.begin(), _organisms.end(), [&o, this](const Organism &a, const Organism &b)->bool{
+                auto dxa = Exceed(o.x - a.x, _ratio);
+                auto dya = Exceed(o.y - a.y, _ratio);
+
+                auto dxb = Exceed(o.x - a.x, _ratio);
+                auto dyb = Exceed(o.y - a.y, _ratio);
+                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dxb);
+            });
+            return {_organisms[0], _organisms[1], _organisms[2]};
         }
 
-    private:
         std::vector<Organism> _organisms;
         std::vector<Food> _apples;
+        double _ratio;
     };
 
 }

@@ -17,7 +17,7 @@ namespace org
 
         double Distance(const Pos &p) const
         {
-            std::sqrt(Distance2(p));
+            return std::sqrt(Distance2(p));
         }
 
         Pos operator-(const Pos &p) const
@@ -25,10 +25,7 @@ namespace org
             return {x - p.x, y - p.y};
         }
 
-        operator Polar() const
-        {
-            return {std::atan2(y, x), std::sqrt(x * x + y * y)};
-        }
+        operator Polar() const;
     };
 
     struct Polar
@@ -42,7 +39,7 @@ namespace org
 
         double Distance(const Polar &p) const
         {
-            std::sqrt(Distance2(p));
+            return std::sqrt(Distance2(p));
         }
 
         double Angle(const Polar &p) const
@@ -78,4 +75,9 @@ namespace org
         }
     };
 
+
+    Pos::operator Polar() const
+    {
+        return Polar{std::atan2(y, x), std::sqrt(x * x + y * y)};
+    }
 }
