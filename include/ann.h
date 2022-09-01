@@ -98,7 +98,10 @@ namespace org
             }
             for (auto i = layerInfos.begin(); i != layerInfos.end() - 1;)
             {
+
                 auto input = std::get<0>(*i++);
+                std::cout << "I" << input << std::endl;
+                std::cout << "O" << std::get<0>(*i) << std::endl;
 
                 AddLayer(input, std::get<0>(*i), std::get<1>(*i));
             }
@@ -106,7 +109,6 @@ namespace org
 
         void AddLayer(unsigned input, unsigned output, act::Activate::ptr activate)
         {
-            layers.clear();
             layers.emplace_back(input, output, activate);
         }
 

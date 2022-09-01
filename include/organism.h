@@ -107,13 +107,18 @@ namespace org
                 auto delta = f - *this;
                 v.push_back(delta.x);
                 v.push_back(delta.y);
+                //std::cout << 2 << std::endl;
             }
             for (auto p : organizations)
             {
                 auto delta = p - *this;
                 v.push_back(delta.x);
                 v.push_back(delta.y);
+                v.push_back(p.speed);
+                v.push_back(p.yaw);
+                //std::cout << 4 << std::endl;
             }
+            //std::cout << v.size() << std::endl;
             return _brain(v);
         }
 
@@ -142,8 +147,10 @@ namespace org
             for (auto &o : _organisms)
             {
                 auto apples = GetApples(o);
-                auto organizations = GetOrganisms(o);
-                auto result = o.Decide(apples, _organisms);
+                auto orgs = GetOrganisms(o);
+                //std::cout << apples.size() << std::endl;
+                //std::cout << orgs.size() << std::endl;
+                auto result = o.Decide(apples, orgs);
                 o.Step(result[0], result[1]);
                 // limit
             }

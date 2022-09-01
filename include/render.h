@@ -64,6 +64,11 @@ namespace org
 
         void Draw(cv::Mat &image, const Organism &o)
         {
+            cv::Scalar line_Color(0, 0, 255); // Color of the circle
+            auto dx = 10 * std::cos(o.yaw);
+            auto dy = 10 * std::sin(o.yaw);
+            cv::circle(image, {o.x + _center.x, o.y + _center.y}, 7, line_Color, 1);
+            cv::line(image, {o.x + _center.x, o.y + _center.y}, {dx + _center.x + o.x, dy + _center.y + o.y}, line_Color, 1);
         }
 
         virtual void OnRender(cv::Mat &image, unsigned width, unsigned height)
@@ -86,6 +91,7 @@ namespace org
                 Draw(image, o);
             }
 
+/*
             cv::circle(image, center, radius, line_Color, thickness); // Using circle()function to draw the line//
             cv::putText(image, "Press q to quit", cv::Point(100, 50), 0, 0.5, line_Color, 1);
             cv::putText(image, "Press q to quit", cv::Point(100, 100), 1, 0.5, line_Color, thickness, cv::LINE_AA);
@@ -95,7 +101,7 @@ namespace org
             cv::putText(image, "Press q to quit", cv::Point(100, 300), 5, 0.5, line_Color, thickness, cv::LINE_AA);
             cv::putText(image, "Press q to quit", cv::Point(100, 350), 6, 0.5, line_Color, thickness, cv::LINE_AA);
             cv::putText(image, "Press q to quit", cv::Point(100, 400), 7, 0.5, line_Color, thickness, cv::LINE_AA);
-
+*/
             // ft2->putText(image, "Press q to quit", cv::Point(100, 450), 18, line_Color, thickness, cv::LINE_AA, true);
         }
 
