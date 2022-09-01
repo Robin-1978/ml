@@ -61,6 +61,14 @@ namespace org
     {
         double yaw, speed;
 
+        virtual void Random(double range)
+        {
+            x = Random::Instance().RealInRange(-range, range);
+            y = Random::Instance().RealInRange(-range, range);
+            speed = Random::Instance().RealInRange(-1.0, 1.0);
+            yaw = Random::Instance().RealInRange(-M_PI, M_PI);
+        }
+
         void Step(double v, double w)
         {
             auto dx = speed * std::cos(yaw);
@@ -81,19 +89,21 @@ namespace org
 
             auto dxx = speed * std::cos(yaw);
             auto dyy = speed * std::sin(yaw);
+
             x += (dx + dxx) / 2;
             y += (dy + dyy) / 2;
+
+            //std::cout <<"Speed:" << speed <<"POS:" << x <<","<< y <<"Yaw" << yaw <<std::endl;
         }
     };
 
     struct Food : Position
     {
+        int step = 0;
     };
 
-    class Organism : public State
+    struct Organism : public State
     {
-    public:
-    public:
         Organism()
             : _score{}, _brain{{{18, nullptr}, {36, std::make_shared<org::act::Tanh>()}, {2, std::make_shared<org::act::Tanh>()}}}
         {
@@ -122,23 +132,22 @@ namespace org
             return _brain(v);
         }
 
-    private:
         unsigned _score;
         org::Network _brain;
     };
 
     struct World
     {
-        World(unsigned oc, unsigned fc, double ratio = 100)
+        World(unsigned oc, unsigned fc, double ratio = 500)
             : _organisms(oc), _apples(fc), _ratio(ratio)
         {
             for(auto& o : _organisms)
             {
-                o.Random(ratio);
+                o.Random(ratio/2);
             }   
             for(auto& a : _apples)
             {
-                a.Random(ratio);
+                a.Random(ratio/2);
             }
         }
 
@@ -146,40 +155,61 @@ namespace org
         {
             for (auto &o : _organisms)
             {
-                auto apples = GetApples(o);
-                auto orgs = GetOrganisms(o);
+                GetApples(o);
+                GetOrganisms(o);
+
+                for(auto &a : _apples)
+                {
+                    if(a.step > 0)
+                    {
+                        a.step--;
+                        continue;
+                    }
+
+                    auto dxa = Exceed(o.x - a.x, _ratio);
+                    auto dya = Exceed(o.y - a.y, _ratio);
+
+                    if((dxa * dxa + dya * dya) < 5 * 5)
+                    {
+                        o._score++;
+                        a.step = 1000;
+                        a.Random(_ratio/2);
+                    }
+                }
                 //std::cout << apples.size() << std::endl;
                 //std::cout << orgs.size() << std::endl;
-                auto result = o.Decide(apples, orgs);
-                o.Step(result[0], result[1]);
-                // limit
+                auto result = o.Decide({_apples[0], _apples[1], _apples[2]}, {_organisms[0], _organisms[1], _organisms[2]});
+                o.Step(result[0], result[1]/100);
+                o.x = Exceed(o.x, _ratio/2);
+                o.y = Exceed(o.y, _ratio/2);
+
             }
         }
 
-        std::vector<Food> GetApples(const Organism &o)
+        void GetApples(const Organism &o)
         {
             std::sort(_apples.begin(), _apples.end(), [&o, this](const Food &a, const Food &b)->bool{
                 auto dxa = Exceed(o.x - a.x, _ratio);
                 auto dya = Exceed(o.y - a.y, _ratio);
 
-                auto dxb = Exceed(o.x - a.x, _ratio);
-                auto dyb = Exceed(o.y - a.y, _ratio);
-                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dxb);
+                auto dxb = Exceed(o.x - b.x, _ratio);
+                auto dyb = Exceed(o.y - b.y, _ratio);
+                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb);
             });
-            return {_apples[0], _apples[1], _apples[2]};
+            //return _apples;
         }
 
-        std::vector<Organism> GetOrganisms(const Organism &o)
+        void GetOrganisms(const Organism &o)
         {
             std::sort(_organisms.begin(), _organisms.end(), [&o, this](const Organism &a, const Organism &b)->bool{
                 auto dxa = Exceed(o.x - a.x, _ratio);
                 auto dya = Exceed(o.y - a.y, _ratio);
 
-                auto dxb = Exceed(o.x - a.x, _ratio);
-                auto dyb = Exceed(o.y - a.y, _ratio);
-                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dxb);
+                auto dxb = Exceed(o.x - b.x, _ratio);
+                auto dyb = Exceed(o.y - b.y, _ratio);
+                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb);
             });
-            return {_organisms[0], _organisms[1], _organisms[2]};
+           // return _organisms;
         }
 
         std::vector<Organism> _organisms;

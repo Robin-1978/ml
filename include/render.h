@@ -49,26 +49,30 @@ namespace org
 
     protected:
         Render()
-            : _name("Defalut Name"), _width(1000), _height(1000),
+            : _name("Defalut Name"), _width(500), _height(500),
               _image(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)), _back(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)),
-              _isBreak(false), _world(10, 10, 500), _center{_width / 2, _height / 2}
+              _isBreak(false), _world(10, 50, 500), _center{_width / 2.0, _height / 2.0}
         {
             cv::namedWindow(_name);
         }
 
         void Draw(cv::Mat &image, const Food &apple)
         {
+            if(apple.step > 0) return;
             cv::Scalar line_Color(0, 255, 0); // Color of the circle
-            cv::circle(image, {apple.x + _center.x, apple.y + _center.y}, 5, line_Color, 1);
+            cv::circle(image, cv::Point{int(apple.x + _center.x), int(apple.y + _center.y)}, 5, line_Color, 1);
         }
 
         void Draw(cv::Mat &image, const Organism &o)
         {
-            cv::Scalar line_Color(0, 0, 255); // Color of the circle
+            cv::Scalar line_Color(0, 255, 255); // Color of the circle
+            cv::Scalar line_Color1(0, 0, 255); // Color of the circle
             auto dx = 10 * std::cos(o.yaw);
             auto dy = 10 * std::sin(o.yaw);
-            cv::circle(image, {o.x + _center.x, o.y + _center.y}, 7, line_Color, 1);
-            cv::line(image, {o.x + _center.x, o.y + _center.y}, {dx + _center.x + o.x, dy + _center.y + o.y}, line_Color, 1);
+            auto score = std::to_string(o._score);
+            cv::putText(image, score, {int(o.x + _center.x)-3, int(o.y + _center.y)-5}, 0, 0.5, line_Color1, 1);
+            cv::circle(image, {int(o.x + _center.x), int(o.y + _center.y)}, 7, line_Color, 1);
+            cv::line(image, {int(o.x + _center.x), int(o.y + _center.y)}, {int(dx + _center.x + o.x), int(dy + _center.y + o.y)}, line_Color, 1);
         }
 
         virtual void OnRender(cv::Mat &image, unsigned width, unsigned height)
