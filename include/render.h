@@ -32,16 +32,19 @@ namespace org
         void Run()
         {
             std::chrono::system_clock::time_point start{};
+            //unsigned fps = 0;
             while (!_isBreak)
             {
-                if ((std::chrono::system_clock::now() - start).count() > 16666)
+                if (_isFast || ((std::chrono::system_clock::now() - start).count() > 16666666))
                 { // 60hz clock
+                    //std::cout <<"***" << std::endl;
                     start = std::chrono::system_clock::now();
                     _world.Step();
                     OnRender(_image, _height, _width);
                     std::function<void(int event, int x, int y, int flad, void *param)> fun = std::bind(&Render::OnMouse, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
                     cv::imshow(_name, _image); // Showing the circle//
                     cv::setMouseCallback(_name, Render::_OnMouse);
+                    //fps++;
                 }
                 OnKey(cv::waitKey(1));
             }
@@ -51,7 +54,7 @@ namespace org
         Render()
             : _name("Defalut Name"), _width(500), _height(500),
               _image(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)), _back(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)),
-              _isBreak(false), _world(10, 50, 500), _center{_width / 2.0, _height / 2.0}
+              _isBreak(false), _world(10, 50, 500), _center{_width / 2.0, _height / 2.0}, _isFast(false)
         {
             cv::namedWindow(_name);
         }
@@ -60,19 +63,19 @@ namespace org
         {
             if(apple.step > 0) return;
             cv::Scalar line_Color(0, 255, 0); // Color of the circle
-            cv::circle(image, cv::Point{int(apple.x + _center.x), int(apple.y + _center.y)}, 5, line_Color, 1);
+            cv::circle(image, cv::Point{int(apple.x + _center.x), int(apple.y + _center.y)}, 5, line_Color, 2);
         }
 
         void Draw(cv::Mat &image, const Organism &o)
         {
-            cv::Scalar line_Color(0, 255, 255); // Color of the circle
-            cv::Scalar line_Color1(0, 0, 255); // Color of the circle
+            cv::Scalar line_Color(0, 0, 255); // Color of the circle
+            cv::Scalar line_Color1(0, 0, 0); // Color of the circle
             auto dx = 10 * std::cos(o.yaw);
             auto dy = 10 * std::sin(o.yaw);
             auto score = std::to_string(o._score);
             cv::putText(image, score, {int(o.x + _center.x)-3, int(o.y + _center.y)-5}, 0, 0.5, line_Color1, 1);
-            cv::circle(image, {int(o.x + _center.x), int(o.y + _center.y)}, 7, line_Color, 1);
-            cv::line(image, {int(o.x + _center.x), int(o.y + _center.y)}, {int(dx + _center.x + o.x), int(dy + _center.y + o.y)}, line_Color, 1);
+            cv::circle(image, {int(o.x + _center.x), int(o.y + _center.y)}, 7, line_Color, 2);
+            cv::line(image, {int(o.x + _center.x), int(o.y + _center.y)}, {int(dx + _center.x + o.x), int(dy + _center.y + o.y)}, line_Color, 2);
         }
 
         virtual void OnRender(cv::Mat &image, unsigned width, unsigned height)
@@ -94,9 +97,13 @@ namespace org
             {
                 Draw(image, o);
             }
-
+            if(_isFast)
+            {
+                cv::putText(image, "Fast Mode", cv::Point(100, 50), 0, 0.5, line_Color, 1);
+            }
 /*
             cv::circle(image, center, radius, line_Color, thickness); // Using circle()function to draw the line//
+
             cv::putText(image, "Press q to quit", cv::Point(100, 50), 0, 0.5, line_Color, 1);
             cv::putText(image, "Press q to quit", cv::Point(100, 100), 1, 0.5, line_Color, thickness, cv::LINE_AA);
             cv::putText(image, "Press q to quit", cv::Point(100, 150), 2, 0.5, line_Color, thickness, cv::LINE_AA);
@@ -115,6 +122,10 @@ namespace org
             {
                 _isBreak = true;
             }
+            else if(key == 'f')
+            {
+                _isFast = !_isFast;
+            }
         }
 
         virtual void OnMouse(int event, int x, int y, int flag, void *param)
@@ -130,6 +141,7 @@ namespace org
         bool _isBreak;
         World _world;
         Pos _center;
+        bool _isFast;
 
     private:
         static void _OnMouse(int event, int x, int y, int flag, void *param)

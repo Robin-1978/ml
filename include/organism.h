@@ -169,7 +169,7 @@ namespace org
                     auto dxa = Exceed(o.x - a.x, _ratio);
                     auto dya = Exceed(o.y - a.y, _ratio);
 
-                    if((dxa * dxa + dya * dya) < 5 * 5)
+                    if((dxa * dxa + dya * dya) < 10 * 10)
                     {
                         o._score++;
                         a.step = 1000;
@@ -178,7 +178,7 @@ namespace org
                 }
                 //std::cout << apples.size() << std::endl;
                 //std::cout << orgs.size() << std::endl;
-                auto result = o.Decide({_apples[0], _apples[1], _apples[2]}, {_organisms[0], _organisms[1], _organisms[2]});
+                auto result = o.Decide({_apples[0], _apples[1], _apples[2]}, {_organisms[1], _organisms[2], _organisms[3]});
                 o.Step(result[0], result[1]/100);
                 o.x = Exceed(o.x, _ratio/2);
                 o.y = Exceed(o.y, _ratio/2);
