@@ -5,6 +5,7 @@
 #include "coords.h"
 #include "ann.h"
 #include "random.h"
+#include "ga.h"
 
 namespace org
 {
@@ -19,22 +20,24 @@ namespace org
     }
 
     template <typename T>
-    T Exceed(const T& v, const T& limit)
+    T Exceed(const T &v, const T &limit)
     {
-        if(v < -limit) return v + 2 * limit;
-        if(v > limit) return v - 2 * limit;
+        if (v < -limit)
+            return v + 2 * limit;
+        if (v > limit)
+            return v - 2 * limit;
         return v;
     }
 
     template <typename T>
-    T Limit(const T& v, const T& limit)
+    T Limit(const T &v, const T &limit)
     {
-        if(v < -limit) return -limit;
-        if(v > limit) return limit;
+        if (v < -limit)
+            return -limit;
+        if (v > limit)
+            return limit;
         return v;
     }
-
-
 
     struct Position : Pos
     {
@@ -93,7 +96,7 @@ namespace org
             x += (dx + dxx) / 2;
             y += (dy + dyy) / 2;
 
-            //std::cout <<"Speed:" << speed <<"POS:" << x <<","<< y <<"Yaw" << yaw <<std::endl;
+            // std::cout <<"Speed:" << speed <<"POS:" << x <<","<< y <<"Yaw" << yaw <<std::endl;
         }
     };
 
@@ -117,7 +120,7 @@ namespace org
                 auto delta = f - *this;
                 v.push_back(delta.x);
                 v.push_back(delta.y);
-                //std::cout << 2 << std::endl;
+                // std::cout << 2 << std::endl;
             }
             for (auto p : organizations)
             {
@@ -126,9 +129,9 @@ namespace org
                 v.push_back(delta.y);
                 v.push_back(p.speed);
                 v.push_back(p.yaw);
-                //std::cout << 4 << std::endl;
+                // std::cout << 4 << std::endl;
             }
-            //std::cout << v.size() << std::endl;
+            // std::cout << v.size() << std::endl;
             return _brain(v);
         }
 
@@ -141,13 +144,35 @@ namespace org
         World(unsigned oc, unsigned fc, double ratio = 500)
             : _organisms(oc), _apples(fc), _ratio(ratio)
         {
-            for(auto& o : _organisms)
+            for (auto &o : _organisms)
             {
-                o.Random(ratio/2);
-            }   
-            for(auto& a : _apples)
+                o.Random(ratio / 2);
+            }
+            for (auto &a : _apples)
             {
-                a.Random(ratio/2);
+                a.Random(ratio / 2);
+            }
+        }
+
+        void NextGeneration()
+        {
+            std::sort(_organisms.begin(), _organisms.end(), [this](const Organism &a, const Organism &b) -> bool
+                      { return a._score < b._score; });
+            double total{};
+            for (auto &o : _organisms)
+            {
+                total += o._score;
+            }
+
+            Dnas dnas;
+            for (auto &o : _organisms)
+            {
+                dnas.emplace_back(std::make_tuple(o._brain.ToDna(), double(o._score) / total));
+            }
+            auto ndna = Ga()(dnas).begin();
+            for (auto &o : _organisms)
+            {
+                o._brain.FromDna(*ndna);
             }
         }
 
@@ -158,9 +183,9 @@ namespace org
                 GetApples(o);
                 GetOrganisms(o);
 
-                for(auto &a : _apples)
+                for (auto &a : _apples)
                 {
-                    if(a.step > 0)
+                    if (a.step > 0)
                     {
                         a.step--;
                         continue;
@@ -169,47 +194,46 @@ namespace org
                     auto dxa = Exceed(o.x - a.x, _ratio);
                     auto dya = Exceed(o.y - a.y, _ratio);
 
-                    if((dxa * dxa + dya * dya) < 10 * 10)
+                    if ((dxa * dxa + dya * dya) < 10 * 10)
                     {
                         o._score++;
                         a.step = 1000;
-                        a.Random(_ratio/2);
+                        a.Random(_ratio / 2);
                     }
                 }
-                //std::cout << apples.size() << std::endl;
-                //std::cout << orgs.size() << std::endl;
+                // std::cout << apples.size() << std::endl;
+                // std::cout << orgs.size() << std::endl;
                 auto result = o.Decide({_apples[0], _apples[1], _apples[2]}, {_organisms[1], _organisms[2], _organisms[3]});
-                o.Step(result[0], result[1]/100);
-                o.x = Exceed(o.x, _ratio/2);
-                o.y = Exceed(o.y, _ratio/2);
-
+                o.Step(result[0], result[1] / 100);
+                o.x = Exceed(o.x, _ratio / 2);
+                o.y = Exceed(o.y, _ratio / 2);
             }
         }
 
         void GetApples(const Organism &o)
         {
-            std::sort(_apples.begin(), _apples.end(), [&o, this](const Food &a, const Food &b)->bool{
+            std::sort(_apples.begin(), _apples.end(), [&o, this](const Food &a, const Food &b) -> bool
+                      {
                 auto dxa = Exceed(o.x - a.x, _ratio);
                 auto dya = Exceed(o.y - a.y, _ratio);
 
                 auto dxb = Exceed(o.x - b.x, _ratio);
                 auto dyb = Exceed(o.y - b.y, _ratio);
-                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb);
-            });
-            //return _apples;
+                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb); });
+            // return _apples;
         }
 
         void GetOrganisms(const Organism &o)
         {
-            std::sort(_organisms.begin(), _organisms.end(), [&o, this](const Organism &a, const Organism &b)->bool{
+            std::sort(_organisms.begin(), _organisms.end(), [&o, this](const Organism &a, const Organism &b) -> bool
+                      {
                 auto dxa = Exceed(o.x - a.x, _ratio);
                 auto dya = Exceed(o.y - a.y, _ratio);
 
                 auto dxb = Exceed(o.x - b.x, _ratio);
                 auto dyb = Exceed(o.y - b.y, _ratio);
-                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb);
-            });
-           // return _organisms;
+                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb); });
+            // return _organisms;
         }
 
         std::vector<Organism> _organisms;

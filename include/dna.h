@@ -13,7 +13,7 @@ namespace org
     {
         std::vector<T> data;
 
-        basic_dna Corssover(const basic_dna &dna)
+        basic_dna Corssover(const basic_dna &dna) const
         {
             auto pos = Random::Instance().IntInRange(std::size_t(0), dna.data.size() - 1);
             basic_dna child;

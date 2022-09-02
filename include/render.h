@@ -32,7 +32,7 @@ namespace org
         void Run()
         {
             std::chrono::system_clock::time_point start{};
-            //unsigned fps = 0;
+            unsigned steps{};
             while (!_isBreak)
             {
                 if (_isFast || ((std::chrono::system_clock::now() - start).count() > 16666666))
@@ -44,7 +44,14 @@ namespace org
                     std::function<void(int event, int x, int y, int flad, void *param)> fun = std::bind(&Render::OnMouse, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
                     cv::imshow(_name, _image); // Showing the circle//
                     cv::setMouseCallback(_name, Render::_OnMouse);
-                    //fps++;
+                    steps++;
+
+                    if(steps > 10000)
+                    {
+                        _world.NextGeneration();
+                        steps = 0;
+                        _genetation++;
+                    }
                 }
                 OnKey(cv::waitKey(1));
             }
@@ -54,7 +61,7 @@ namespace org
         Render()
             : _name("Defalut Name"), _width(500), _height(500),
               _image(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)), _back(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)),
-              _isBreak(false), _world(10, 50, 500), _center{_width / 2.0, _height / 2.0}, _isFast(false)
+              _isBreak(false), _world(10, 50, 500), _center{_width / 2.0, _height / 2.0}, _isFast(false), _genetation{}
         {
             cv::namedWindow(_name);
         }
@@ -101,6 +108,8 @@ namespace org
             {
                 cv::putText(image, "Fast Mode", cv::Point(100, 50), 0, 0.5, line_Color, 1);
             }
+
+             cv::putText(image, std::to_string(_genetation), cv::Point(100, 100), 0, 1, line_Color, 1);
 /*
             cv::circle(image, center, radius, line_Color, thickness); // Using circle()function to draw the line//
 
@@ -142,6 +151,7 @@ namespace org
         World _world;
         Pos _center;
         bool _isFast;
+        unsigned _genetation;
 
     private:
         static void _OnMouse(int event, int x, int y, int flag, void *param)
