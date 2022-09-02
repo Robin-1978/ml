@@ -109,7 +109,9 @@ namespace org
                 cv::putText(image, "Fast Mode", cv::Point(100, 50), 0, 0.5, line_Color, 1);
             }
 
-             cv::putText(image, std::to_string(_genetation), cv::Point(100, 100), 0, 1, line_Color, 1);
+            cv::putText(image, "G:" + std::to_string(_genetation), cv::Point(50, 100), 0, 0.5, line_Color, 1);
+            cv::putText(image, "Max:" + std::to_string(_world._lastScore), cv::Point(150, 100), 0, 0.5, line_Color, 1);
+            cv::putText(image, "Cur:" + std::to_string(_world._curScore), cv::Point(250, 100), 0, 0.5, line_Color, 1);
 /*
             cv::circle(image, center, radius, line_Color, thickness); // Using circle()function to draw the line//
 

@@ -49,7 +49,7 @@ namespace org
                 auto &ad = std::get<0>(dnas[a]);
                 auto &bd = std::get<0>(dnas[b]);
 
-                result.push_back(ad.Corssover(bd));
+                result.emplace_back(ad.Corssover(bd));
             }
             return result;
         }

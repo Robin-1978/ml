@@ -142,7 +142,7 @@ namespace org
     struct World
     {
         World(unsigned oc, unsigned fc, double ratio = 500)
-            : _organisms(oc), _apples(fc), _ratio(ratio)
+            : _organisms(oc), _apples(fc), _ratio(ratio), _lastScore{}, _curScore{}
         {
             for (auto &o : _organisms)
             {
@@ -157,8 +157,11 @@ namespace org
         void NextGeneration()
         {
             std::sort(_organisms.begin(), _organisms.end(), [this](const Organism &a, const Organism &b) -> bool
-                      { return a._score < b._score; });
+                      { return a._score > b._score; });
+            _lastScore = _organisms[0]._score;
+            std::cout << "Max Score: " << _lastScore << std::endl;
             double total{};
+
             for (auto &o : _organisms)
             {
                 total += o._score;
@@ -169,11 +172,14 @@ namespace org
             {
                 dnas.emplace_back(std::make_tuple(o._brain.ToDna(), double(o._score) / total));
             }
-            auto ndna = Ga()(dnas).begin();
+            auto ndnas = Ga()(dnas);
+            auto ndna = ndnas.begin();
             for (auto &o : _organisms)
             {
-                o._brain.FromDna(*ndna);
+                o._brain.FromDna(*ndna++);
+                o._score = 0;
             }
+            _curScore = 0;
         }
 
         void Step()
@@ -199,12 +205,14 @@ namespace org
                         o._score++;
                         a.step = 1000;
                         a.Random(_ratio / 2);
+
+                        _curScore = std::max(_curScore, o._score);
                     }
                 }
                 // std::cout << apples.size() << std::endl;
                 // std::cout << orgs.size() << std::endl;
                 auto result = o.Decide({_apples[0], _apples[1], _apples[2]}, {_organisms[1], _organisms[2], _organisms[3]});
-                o.Step(result[0], result[1] / 100);
+                o.Step(result[0]/100, result[1] / 100);
                 o.x = Exceed(o.x, _ratio / 2);
                 o.y = Exceed(o.y, _ratio / 2);
             }
@@ -213,7 +221,9 @@ namespace org
         void GetApples(const Organism &o)
         {
             std::sort(_apples.begin(), _apples.end(), [&o, this](const Food &a, const Food &b) -> bool
-                      {
+            {
+                if(a.step > 0) return false;
+                if(b.step > 0) return true;
                 auto dxa = Exceed(o.x - a.x, _ratio);
                 auto dya = Exceed(o.y - a.y, _ratio);
 
@@ -239,6 +249,7 @@ namespace org
         std::vector<Organism> _organisms;
         std::vector<Food> _apples;
         double _ratio;
+        unsigned _lastScore, _curScore;
     };
 
 }
