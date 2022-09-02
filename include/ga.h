@@ -50,6 +50,7 @@ namespace org
                 auto &bd = std::get<0>(dnas[b]);
 
                 result.emplace_back(ad.Corssover(bd));
+                result.rbegin()->Mutation(0.001);
             }
             return result;
         }
