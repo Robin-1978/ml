@@ -110,28 +110,28 @@ namespace org
     {
         Organism()
             : _score{},
-              _brain{{{18, nullptr},
+              _brain{{{6, nullptr},
                       {12, std::make_shared<org::act::Tanh>()},
                       {4, std::make_shared<org::act::Tanh>()},
                       {2, std::make_shared<org::act::Tanh>()}}}
         {
         }
 
-        values Decide(const std::vector<Food> &foods, const std::vector<Organism> &organizations)
+        values Decide(const std::vector<Food> &foods, const std::vector<Organism> &organizations, double limit)
         {
             values v;
             for (auto &f : foods)
             {
                 auto delta = f - *this;
-                v.push_back(delta.x);
-                v.push_back(delta.y);
+                v.push_back(Exceed(delta.x, limit));
+                v.push_back(Exceed(delta.y, limit));
                 // std::cout << 2 << std::endl;
             }
             for (auto p : organizations)
             {
                 auto delta = p - *this;
-                v.push_back(delta.x);
-                v.push_back(delta.y);
+                v.push_back(Exceed(delta.x, limit));
+                v.push_back(Exceed(delta.y, limit));
                 v.push_back(p.speed);
                 v.push_back(p.yaw);
                 // std::cout << 4 << std::endl;
@@ -139,7 +139,19 @@ namespace org
             // std::cout << v.size() << std::endl;
             return _brain(v);
         }
-
+        
+        values Decide(const std::vector<Food> &foods, double limit)
+        {
+            values v;
+            for (auto &f : foods)
+            {
+                auto delta = f - *this;
+                v.push_back(Exceed(delta.x, limit));
+                v.push_back(Exceed(delta.y, limit));
+                // std::cout << 2 << std::endl;
+            };
+            return _brain(v);
+        }
         unsigned _score;
         org::Network _brain;
     };
@@ -192,18 +204,19 @@ namespace org
             Judge();
             Move();
         }
-        
+
         void Move()
         {
             for (auto &o : _organisms)
             {
                 auto apples = GetApples(o);
-                auto orgs = GetOrganisms(o);
+                //auto orgs = GetOrganisms(o);
                 // std::cout << "----------------------------------------------------"   << std::endl;
                 //  std::cout << apples.size() << std::endl;
                 //  std::cout << orgs.size() << std::endl;
-                auto result = o.Decide({_apples[apples[0]], _apples[apples[1]], _apples[apples[2]]},
-                                       {_organisms[orgs[1]], _organisms[orgs[2]], _organisms[orgs[3]]});
+                //auto result = o.Decide({_apples[apples[0]], _apples[apples[1]], _apples[apples[2]]},
+                //                       {_organisms[orgs[1]], _organisms[orgs[2]], _organisms[orgs[3]]});
+                auto result = o.Decide({_apples[apples[0]], _apples[apples[1]], _apples[apples[2]]}, _ratio/2 );
                 if (result[0] < 0)
                     result[0] = result[0] / 10;
                 o.Step(result[0] / 100, result[1] / 30);
@@ -211,9 +224,10 @@ namespace org
                 o.y = Exceed(o.y, _ratio / 2);
             }
         }
+
         void Judge()
         {
-           std::for_each(std::execution::par, std::begin(_organisms), std::end(_organisms), [this](Organism &o)
+            std::for_each(std::execution::par, std::begin(_organisms), std::end(_organisms), [this](Organism &o)
             { 
                 std::for_each(std::execution::par, std::begin(_apples), std::end(_apples), [&o, this](Food &a)
                 {
@@ -249,7 +263,7 @@ namespace org
                 index.push_back(i);
             }
             std::sort(std::execution::par, index.begin(), index.end(), [&o, this](unsigned a, unsigned b)
-                      {
+            {
                 if(_apples[a].step > 0) return false;
                 if(_apples[b].step > 0) return true;
                 auto dxa = Exceed(o.x - _apples[a].x, _ratio/2);
@@ -258,7 +272,8 @@ namespace org
                 auto dxb = Exceed(o.x - _apples[b].x, _ratio/2);
                 auto dyb = Exceed(o.y - _apples[b].y, _ratio/2);
                 //std::cout << std::sqrt(dxa * dxa + dya * dya) << " " << std::sqrt(dxb * dxb + dyb * dyb) << std::endl;
-                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb); });
+                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb); 
+            });
             return index;
         }
 
@@ -270,13 +285,14 @@ namespace org
                 index.push_back(i);
             }
             std::sort(std::execution::par, index.begin(), index.end(), [&o, this](unsigned a, unsigned b)
-                      {
+            {
                 auto dxa = Exceed(o.x - _organisms[a].x, _ratio/2);
                 auto dya = Exceed(o.y - _organisms[a].y, _ratio/2);
 
                 auto dxb = Exceed(o.x - _organisms[b].x, _ratio/2);
                 auto dyb = Exceed(o.y - _organisms[b].y, _ratio/2);
-                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb); });
+                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb); 
+            });
             return index;
         }
 

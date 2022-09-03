@@ -49,7 +49,7 @@ namespace org
                     cv::setMouseCallback(_name, Render::_OnMouse);
                     steps++;
 
-                    if(steps > 5000)
+                    if(steps > 10000)
                     {
                         _world.NextGeneration();
                         steps = 0;
@@ -64,7 +64,7 @@ namespace org
         Render()
             : _name("Defalut Name"), _width(500), _height(500),
               _image(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)), _back(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)),
-              _isBreak(false), _world(50, 10, 500), _center{_width / 2.0, _height / 2.0}, _isFast(false), _genetation{}
+              _isBreak(false), _world(10, 10, 500), _center{_width / 2.0, _height / 2.0}, _isFast(false), _genetation{}
         {
             cv::namedWindow(_name);
         }
@@ -99,14 +99,13 @@ namespace org
         // cv::Mat texture
             _back.copyTo(_image);
 
-            for (auto &apple : _world._apples)
-            {
+            std::for_each(std::begin(_world._apples), std::end(_world._apples), [&image, this](Food& apple){
                 Draw(image, apple);
-            }
-            for (auto &o : _world._organisms)
-            {
-                Draw(image, o);
-            }
+            });
+
+            std::for_each(std::begin(_world._organisms), std::end(_world._organisms), [&image, this](Organism& apple){
+                Draw(image, apple);
+            });
             if(_isFast)
             {
                 cv::putText(image, "Fast Mode", cv::Point(100, 50), 0, 0.5, line_Color, 1);
