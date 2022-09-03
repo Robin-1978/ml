@@ -31,14 +31,17 @@ namespace org
 
         void Run()
         {
-            std::chrono::system_clock::time_point start{};
+            std::chrono::steady_clock::time_point start{};
+            
+            //std::chrono::system_clock::time_point start{};
             unsigned steps{};
             while (!_isBreak)
             {
-                if (_isFast || ((std::chrono::system_clock::now() - start).count() > 16666666))
+                if (_isFast || ((std::chrono::steady_clock::now() - start).count() > 16666666))
                 { // 60hz clock
                     //std::cout <<"***" << std::endl;
-                    start = std::chrono::system_clock::now();
+                    //start = std::chrono::system_clock::now();
+                    start = std::chrono::steady_clock::now();
                     _world.Step();
                     OnRender(_image, _height, _width);
                     std::function<void(int event, int x, int y, int flad, void *param)> fun = std::bind(&Render::OnMouse, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
@@ -46,7 +49,7 @@ namespace org
                     cv::setMouseCallback(_name, Render::_OnMouse);
                     steps++;
 
-                    if(steps > 10000)
+                    if(steps > 2000)
                     {
                         _world.NextGeneration();
                         steps = 0;
@@ -141,7 +144,7 @@ namespace org
 
         virtual void OnMouse(int event, int x, int y, int flag, void *param)
         {
-            fmt::print("Mouse:{} {} {} {}\n", event, x, y, flag);
+            //fmt::print("Mouse:{} {} {} {}\n", event, x, y, flag);
         }
 
     protected:

@@ -186,64 +186,81 @@ namespace org
         {
             for (auto &o : _organisms)
             {
-                GetApples(o);
-                GetOrganisms(o);
-
-                for (auto &a : _apples)
+                auto apples = GetApples(o);
+                auto orgs = GetOrganisms(o);
+                //std::cout << "----------------------------------------------------"   << std::endl;
+                for (auto &a : apples)
                 {
-                    if (a.step > 0)
+                    if (_apples[a].step > 0)
                     {
-                        a.step--;
+                        _apples[a].step--;
                         continue;
                     }
 
-                    auto dxa = Exceed(o.x - a.x, _ratio);
-                    auto dya = Exceed(o.y - a.y, _ratio);
 
-                    if ((dxa * dxa + dya * dya) < 10 * 10)
+                    auto dxa = Exceed(o.x - _apples[a].x, _ratio/2);
+                    auto dya = Exceed(o.y - _apples[a].y, _ratio/2);
+                    auto distance = dxa * dxa + dya * dya;
+                    //std::cout << "Distance:" << std::sqrt(distance) << std::endl;
+                    if (distance < 10 * 10)
                     {
                         o._score++;
-                        a.step = 1000;
-                        a.Random(_ratio / 2);
+                        _apples[a].step = 1000;
+                        _apples[a].Random(_ratio / 2);
 
                         _curScore = std::max(_curScore, o._score);
                     }
                 }
                 // std::cout << apples.size() << std::endl;
                 // std::cout << orgs.size() << std::endl;
-                auto result = o.Decide({_apples[0], _apples[1], _apples[2]}, {_organisms[1], _organisms[2], _organisms[3]});
+                auto result = o.Decide({_apples[apples[0]], _apples[apples[1]], _apples[apples[2]]},
+                     {_organisms[orgs[1]], _organisms[orgs[2]], _organisms[orgs[3]]});
                 o.Step(result[0]/100, result[1] / 100);
                 o.x = Exceed(o.x, _ratio / 2);
                 o.y = Exceed(o.y, _ratio / 2);
             }
         }
 
-        void GetApples(const Organism &o)
+        std::vector<unsigned> GetApples(const Organism &o)
         {
-            std::sort(_apples.begin(), _apples.end(), [&o, this](const Food &a, const Food &b) -> bool
+            //std::cout << "****************************************************************" << std::endl;
+            std::vector<unsigned> index;
+            for(auto i = 0; i <_apples.size(); i++)
             {
-                if(a.step > 0) return false;
-                if(b.step > 0) return true;
-                auto dxa = Exceed(o.x - a.x, _ratio);
-                auto dya = Exceed(o.y - a.y, _ratio);
+                index.push_back(i);
+            }
+            std::sort(index.begin(), index.end(), [&o, this](unsigned a, unsigned b)
+            {
+                if(_apples[a].step > 0) return false;
+                if(_apples[b].step > 0) return true;
+                auto dxa = Exceed(o.x - _apples[a].x, _ratio/2);
+                auto dya = Exceed(o.y - _apples[a].y, _ratio/2);
 
-                auto dxb = Exceed(o.x - b.x, _ratio);
-                auto dyb = Exceed(o.y - b.y, _ratio);
-                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb); });
-            // return _apples;
+                auto dxb = Exceed(o.x - _apples[b].x, _ratio/2);
+                auto dyb = Exceed(o.y - _apples[b].y, _ratio/2);
+                //std::cout << std::sqrt(dxa * dxa + dya * dya) << " " << std::sqrt(dxb * dxb + dyb * dyb) << std::endl;
+                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb); 
+            });
+            return index;
         }
 
-        void GetOrganisms(const Organism &o)
+        std::vector<unsigned> GetOrganisms(const Organism &o)
         {
-            std::sort(_organisms.begin(), _organisms.end(), [&o, this](const Organism &a, const Organism &b) -> bool
-                      {
-                auto dxa = Exceed(o.x - a.x, _ratio);
-                auto dya = Exceed(o.y - a.y, _ratio);
+            std::vector<unsigned> index;
+            for(auto i = 0; i <_organisms.size(); i++)
+            {
+                index.push_back(i);
+            }
+            std::sort(index.begin(), index.end(), [&o, this](unsigned a, unsigned b)
+            {
+                auto dxa = Exceed(o.x - _organisms[a].x, _ratio/2);
+                auto dya = Exceed(o.y - _organisms[a].y, _ratio/2);
 
-                auto dxb = Exceed(o.x - b.x, _ratio);
-                auto dyb = Exceed(o.y - b.y, _ratio);
-                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb); });
-            // return _organisms;
+                auto dxb = Exceed(o.x - _organisms[b].x, _ratio/2);
+                auto dyb = Exceed(o.y - _organisms[b].y, _ratio/2);
+                return (dxa * dxa + dya * dya) < (dxb * dxb + dyb * dyb);
+             });
+            return index;
         }
 
         std::vector<Organism> _organisms;

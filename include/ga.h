@@ -41,7 +41,8 @@ namespace org
         std::vector<dna> operator()(const Dnas &dnas) const
         {
             std::vector<dna> result;
-            for (auto i = 0; i < dnas.size(); ++i)
+            result.push_back(std::get<0>(dnas[0]));
+            for (auto i = 0; i < dnas.size() - 1; ++i)
             {
                 auto a = Select(dnas);
                 auto b = Select(dnas);
