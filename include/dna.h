@@ -39,6 +39,18 @@ namespace org
             }
         }
 
+        void Mutation(double probability, double range)
+        {
+            if (Random::Instance().RealInRange(0.0, 1.0) < probability)
+            {
+                auto pos1 = Random::Instance().IntInRange(std::size_t(0u), data.size() - 1);
+                data[pos1] = data[pos1] + Random::Instance().RealInRange(-range, range);
+                if(data[pos1] > 1) data[pos1] = 1;
+                if(data[pos1] < -1) data[pos1] =-1;
+            }
+        }
+
+
         std::ostream &operator<<(std::ostream &os) const
         {
             std::size_t size = data.size();

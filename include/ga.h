@@ -38,11 +38,15 @@ namespace org
             return dnas.size() -1;
         }
 
-        std::vector<dna> operator()(const Dnas &dnas) const
+        std::vector<dna> operator()(const Dnas &dnas, double percent) const
         {
             std::vector<dna> result;
-            result.push_back(std::get<0>(dnas[0]));
-            for (auto i = 0; i < dnas.size() - 1; ++i)
+            int count = std::ceil(dnas.size() * percent);
+            for(int i=0; i < count; i++)
+            {
+                result.push_back(std::get<0>(dnas[i]));
+            }
+            for (auto i = 0; i < dnas.size() - count; ++i)
             {
                 auto a = Select(dnas);
                 auto b = Select(dnas);
@@ -51,7 +55,7 @@ namespace org
                 auto &bd = std::get<0>(dnas[b]);
 
                 result.emplace_back(ad.Corssover(bd));
-                result.rbegin()->Mutation(0.001);
+                result.rbegin()->Mutation(0.1, 0.2);
             }
             return result;
         }

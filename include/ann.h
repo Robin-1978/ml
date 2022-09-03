@@ -17,7 +17,7 @@ namespace org
 
     struct Neuron
     {
-        Neuron(const unsigned count)
+        Neuron(std::size_t count)
         {
             weights.resize(count + 1);
 
@@ -53,7 +53,7 @@ namespace org
     {
         std::vector<Neuron> neurons;
         act::Activate::ptr activate;
-        Layer(const unsigned input, const unsigned output, act::Activate::ptr activate)
+        Layer(std::size_t input, std::size_t output, act::Activate::ptr activate)
             : activate(std::move(activate))
         {
             for (auto n = 0u; n < output; ++n)
@@ -107,12 +107,12 @@ namespace org
             }
         }
 
-        void AddLayer(unsigned input, unsigned output, act::Activate::ptr activate)
+        void AddLayer(std::size_t input, std::size_t output, act::Activate::ptr activate)
         {
             layers.emplace_back(input, output, activate);
         }
 
-        unsigned AppendLayer(unsigned output, act::Activate::ptr activate)
+        unsigned AppendLayer(std::size_t output, act::Activate::ptr activate)
         {
             auto input = layers.back().neurons.size();
             layers.emplace_back(input, output, activate);

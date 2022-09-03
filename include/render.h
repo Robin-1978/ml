@@ -49,7 +49,7 @@ namespace org
                     cv::setMouseCallback(_name, Render::_OnMouse);
                     steps++;
 
-                    if(steps > 2000)
+                    if(steps > 5000)
                     {
                         _world.NextGeneration();
                         steps = 0;
@@ -64,7 +64,7 @@ namespace org
         Render()
             : _name("Defalut Name"), _width(500), _height(500),
               _image(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)), _back(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)),
-              _isBreak(false), _world(10, 50, 500), _center{_width / 2.0, _height / 2.0}, _isFast(false), _genetation{}
+              _isBreak(false), _world(50, 10, 500), _center{_width / 2.0, _height / 2.0}, _isFast(false), _genetation{}
         {
             cv::namedWindow(_name);
         }
