@@ -110,9 +110,9 @@ namespace org
     {
         Organism()
             : _score{},
-              _brain{{{6, nullptr},
-                      {12, std::make_shared<org::act::Tanh>()},
-                      {4, std::make_shared<org::act::Tanh>()},
+              _brain{{{2, nullptr},
+                      {3, std::make_shared<org::act::Sigmod>()},
+                      {3, std::make_shared<org::act::Sigmod>()},
                       {2, std::make_shared<org::act::Tanh>()}}}
         {
         }
@@ -123,17 +123,17 @@ namespace org
             for (auto &f : foods)
             {
                 auto delta = f - *this;
-                v.push_back(Exceed(delta.x, limit));
-                v.push_back(Exceed(delta.y, limit));
+                v.push_back(Exceed(delta.x, limit)/limit);
+                v.push_back(Exceed(delta.y, limit)/limit);
                 // std::cout << 2 << std::endl;
             }
             for (auto p : organizations)
             {
                 auto delta = p - *this;
-                v.push_back(Exceed(delta.x, limit));
-                v.push_back(Exceed(delta.y, limit));
+                v.push_back(Exceed(delta.x, limit)/limit);
+                v.push_back(Exceed(delta.y, limit)/limit);
                 v.push_back(p.speed);
-                v.push_back(p.yaw);
+                v.push_back(p.yaw/ M_PI);
                 // std::cout << 4 << std::endl;
             }
             // std::cout << v.size() << std::endl;
@@ -142,12 +142,12 @@ namespace org
         
         values Decide(const std::vector<Food> &foods, double limit)
         {
-            values v;
+            values v; 
             for (auto &f : foods)
             {
                 auto delta = f - *this;
-                v.push_back(Exceed(delta.x, limit));
-                v.push_back(Exceed(delta.y, limit));
+                v.push_back((Exceed(delta.x, limit) + limit)/2/limit);
+                v.push_back((Exceed(delta.y, limit)+limit)/2/limit);
                 // std::cout << 2 << std::endl;
             };
             return _brain(v);
@@ -210,13 +210,25 @@ namespace org
             for (auto &o : _organisms)
             {
                 auto apples = GetApples(o);
+
+                /*
+                std::cout << "--------------------------------" << std::endl;
+                for(auto &a : apples)
+                {
+                    auto x = Exceed(o.x - _apples[a].x, _ratio / 2);
+                    auto y = Exceed(o.y - _apples[a].y, _ratio / 2);
+                    auto dis = std::sqrt(x * x + y * y);
+                    std::cout << dis << std::endl;
+                }
+                */
                 //auto orgs = GetOrganisms(o);
                 // std::cout << "----------------------------------------------------"   << std::endl;
                 //  std::cout << apples.size() << std::endl;
                 //  std::cout << orgs.size() << std::endl;
                 //auto result = o.Decide({_apples[apples[0]], _apples[apples[1]], _apples[apples[2]]},
                 //                       {_organisms[orgs[1]], _organisms[orgs[2]], _organisms[orgs[3]]});
-                auto result = o.Decide({_apples[apples[0]], _apples[apples[1]], _apples[apples[2]]}, _ratio/2 );
+                //auto result = o.Decide({_apples[apples[0]], _apples[apples[1]], _apples[apples[2]]}, _ratio/2 );
+                auto result = o.Decide({_apples[apples[0]]}, _ratio/2 );
                 if (result[0] < 0)
                     result[0] = result[0] / 10;
                 o.Step(result[0] / 100, result[1] / 30);

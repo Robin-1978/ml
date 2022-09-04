@@ -23,7 +23,7 @@ namespace org
 
             for (auto &w : weights)
             {
-                w = Random::Instance().RealInRange(-1.0, 1.0);
+                w = Random::Instance().RealInRange(0.0, 1.0);
             }
         }
 
