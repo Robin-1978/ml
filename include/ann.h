@@ -25,6 +25,7 @@ namespace org
             {
                 w = Random::Instance().RealInRange(0.0, 1.0);
             }
+            weights[count] = Random::Instance().RealInRange(-1.0, 1.0);
         }
 
         double operator()(values inputs) const
