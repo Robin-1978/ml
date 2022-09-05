@@ -16,7 +16,7 @@ find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 
-find_package(TBB REQUIRED)
+#find_package(TBB REQUIRED)
 
 include_directories(include)
 file(GLOB SOURCES "src/*.cc")
@@ -30,4 +30,4 @@ FetchContent_Declare(fmt
 )
 FetchContent_MakeAvailable(fmt)
 
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} fmt tbb)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} fmt)

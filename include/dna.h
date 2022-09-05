@@ -15,7 +15,7 @@ namespace org
 
         basic_dna Corssover(const basic_dna &dna) const
         {
-            auto pos = Random::Instance().IntInRange(std::size_t(0), dna.data.size() - 1);
+            auto pos = Random::Instance().IntInRange(std::size_t(1), dna.data.size() - 1);
             basic_dna child;
             child.data.insert(child.data.end(), dna.data.begin(), dna.data.begin() + pos);
             child.data.insert(child.data.end(), data.begin() + pos, data.end());
