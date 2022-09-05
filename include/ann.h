@@ -23,7 +23,7 @@ namespace org
 
             for (auto &w : weights)
             {
-                w = Random::Instance().RealInRange(0.0, 1.0);
+                w = Random::Instance().RealInRange(-1.0, 1.0);
             }
             weights[count] = Random::Instance().RealInRange(-1.0, 1.0);
         }
@@ -123,10 +123,27 @@ namespace org
         values operator()(const values &inputs) const
         {
             auto result = inputs;
+            //std::cout << "----------------------------------" << std::endl;
             for (auto &layer : layers)
-            {
+            {   
+                
+                /*
+                for(auto i = 0; i < result.size(); ++i)
+                {
+                    std::cout << " " << result[i];
+                }
+                std::cout << std::endl;
+                */
                 result = layer(result);
+                /*
+                for(auto i = 0; i < result.size(); ++i)
+                {
+                    std::cout << " " << result[i];
+                }
+                std::cout << std::endl  << "" << std::endl;
+                */
             }
+            //std::cout << "----------------------------------" << std::endl;
             return result;
         }
 

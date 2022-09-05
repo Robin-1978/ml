@@ -104,6 +104,11 @@ namespace org
     struct Food : Position
     {
         int step = 0;
+        void Respawn()
+        {
+            step = 0;
+
+        }
     };
 
     struct Organism : public State
@@ -111,8 +116,8 @@ namespace org
         Organism()
             : _score{},
               _brain{{{2, nullptr},
-                      {3, std::make_shared<org::act::Tanh>()},
-                      {3, std::make_shared<org::act::Tanh>()},
+                      {8, std::make_shared<org::act::Tanh>()},
+                      {4, std::make_shared<org::act::Tanh>()},
                       {2, std::make_shared<org::act::Tanh>()}}}
         {
         }
@@ -148,7 +153,6 @@ namespace org
                 auto delta = f - *this;
                 v.push_back((Exceed(delta.x, limit))/limit);
                 v.push_back((Exceed(delta.y, limit))/limit);
-                // std::cout << 2 << std::endl;
             };
             return _brain(v);
         }
@@ -159,7 +163,7 @@ namespace org
     struct World
     {
         World(unsigned oc, unsigned fc, double ratio = 500)
-            : _organisms(oc), _apples(fc), _ratio(ratio), _lastScore{}, _curScore{}
+            : _organisms(oc), _apples(fc), _ratio(ratio), _lastScore{}, _curScore{}, _lastMeanScore{}
         {
             for (auto &o : _organisms)
             {
@@ -176,7 +180,14 @@ namespace org
             std::sort(_organisms.begin(), _organisms.end(), [this](const Organism &a, const Organism &b) -> bool
                       { return a._score > b._score; });
             _lastScore = _organisms[0]._score;
-            std::cout << "Max Score: " << _lastScore << std::endl;
+            for(auto &o : _organisms)
+            {
+                _lastMeanScore += o._score;
+                std::cout << o._score << " ";
+            }
+            _lastMeanScore = _lastMeanScore/_organisms.size();
+
+            std::cout << " Mean Score:" << _lastMeanScore << std::endl;
             double total{};
 
             for (auto &o : _organisms)
@@ -197,6 +208,12 @@ namespace org
                 o._brain.FromDna(*ndna++);
                 //o._brain.Print(std::cout);
                 o._score = 0;
+                o.Random(_ratio/2);
+            }
+            for(auto &a : _apples)
+            {
+                a.Random(_ratio/2);
+                a.step = 0;
             }
             _curScore = 0;
         }
@@ -314,6 +331,7 @@ namespace org
         std::vector<Food> _apples;
         double _ratio;
         unsigned _lastScore, _curScore;
+        double _lastMeanScore;
     };
 
 }

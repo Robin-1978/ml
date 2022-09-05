@@ -43,13 +43,13 @@ namespace org
                     //start = std::chrono::system_clock::now();
                     start = std::chrono::steady_clock::now();
                     _world.Step();
-                    OnRender(_image, _height, _width);
+                    OnRender(_image, _height, _width, steps);
                     std::function<void(int event, int x, int y, int flad, void *param)> fun = std::bind(&Render::OnMouse, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
                     cv::imshow(_name, _image); // Showing the circle//
                     cv::setMouseCallback(_name, Render::_OnMouse);
                     steps++;
 
-                    if(steps > 10000)
+                    if(steps > 50000)
                     {
                         _world.NextGeneration();
                         steps = 0;
@@ -64,7 +64,7 @@ namespace org
         Render()
             : _name("Defalut Name"), _width(500), _height(500),
               _image(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)), _back(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)),
-              _isBreak(false), _world(20, 10, 500), _center{_width / 2.0, _height / 2.0}, _isFast(false), _genetation{}
+              _isBreak(false), _world(50, 100, 500), _center{_width / 2.0, _height / 2.0}, _isFast(false), _genetation{}
         {
             cv::namedWindow(_name);
         }
@@ -88,7 +88,7 @@ namespace org
             cv::line(image, {int(o.x + _center.x), int(o.y + _center.y)}, {int(dx + _center.x + o.x), int(dy + _center.y + o.y)}, line_Color, 2);
         }
 
-        virtual void OnRender(cv::Mat &image, unsigned width, unsigned height)
+        virtual void OnRender(cv::Mat &image, unsigned width, unsigned height, unsigned steps)
         {
 
             cv::Point center(100, 100);     // Declaring the center point
@@ -99,13 +99,16 @@ namespace org
         // cv::Mat texture
             _back.copyTo(_image);
 
-            std::for_each(std::begin(_world._apples), std::end(_world._apples), [&image, this](Food& apple){
-                Draw(image, apple);
-            });
+            if(!_isFast)
+            {
+                std::for_each(std::begin(_world._apples), std::end(_world._apples), [&image, this](Food& apple){
+                    Draw(image, apple);
+                });
 
-            std::for_each(std::begin(_world._organisms), std::end(_world._organisms), [&image, this](Organism& apple){
-                Draw(image, apple);
-            });
+                std::for_each(std::begin(_world._organisms), std::end(_world._organisms), [&image, this](Organism& apple){
+                    Draw(image, apple);
+                });
+            }
             if(_isFast)
             {
                 cv::putText(image, "Fast Mode", cv::Point(100, 50), 0, 0.5, line_Color, 1);
@@ -114,6 +117,7 @@ namespace org
             cv::putText(image, "G:" + std::to_string(_genetation), cv::Point(50, 100), 0, 0.5, line_Color, 1);
             cv::putText(image, "Max:" + std::to_string(_world._lastScore), cv::Point(150, 100), 0, 0.5, line_Color, 1);
             cv::putText(image, "Cur:" + std::to_string(_world._curScore), cv::Point(250, 100), 0, 0.5, line_Color, 1);
+            cv::putText(image, "Step:" + std::to_string(steps), cv::Point(350, 100), 0, 0.5, line_Color, 1);
 /*
             cv::circle(image, center, radius, line_Color, thickness); // Using circle()function to draw the line//
 
