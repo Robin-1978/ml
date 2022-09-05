@@ -15,10 +15,12 @@ set(CMAKE_CXX_STANDARD 17)
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
+find_package(TBB REQUIRED)
+
 include_directories(include)
 file(GLOB SOURCES "src/*.cc")
 
-add_executable(org ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 include(FetchContent)
 FetchContent_Declare(fmt
@@ -27,4 +29,4 @@ FetchContent_Declare(fmt
 )
 FetchContent_MakeAvailable(fmt)
 
-target_link_libraries(org ${OpenCV_LIBS} fmt)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} fmt tbb)
