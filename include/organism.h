@@ -115,8 +115,8 @@ namespace org
     {
         Organism()
             : _score{},
-              _brain{{{2, nullptr},
-                      {8, std::make_shared<org::act::Tanh>()},
+              _brain{{{18, nullptr},
+                      {9, std::make_shared<org::act::Tanh>()},
                       {4, std::make_shared<org::act::Tanh>()},
                       {2, std::make_shared<org::act::Tanh>()}}}
         {
@@ -200,7 +200,7 @@ namespace org
             {
                 dnas.emplace_back(std::make_tuple(o._brain.ToDna(), double(o._score) / total));
             }
-            auto ndnas = Ga()(dnas, 0.2);
+            auto ndnas = Ga()(dnas, 0.1);
             auto ndna = ndnas.begin();
             for (auto &o : _organisms)
             {
@@ -240,14 +240,14 @@ namespace org
                     std::cout << dis << std::endl;
                 }
                 */
-                //auto orgs = GetOrganisms(o);
+                auto orgs = GetOrganisms(o);
                 // std::cout << "----------------------------------------------------"   << std::endl;
                 //  std::cout << apples.size() << std::endl;
                 //  std::cout << orgs.size() << std::endl;
-                //auto result = o.Decide({_apples[apples[0]], _apples[apples[1]], _apples[apples[2]]},
-                //                       {_organisms[orgs[1]], _organisms[orgs[2]], _organisms[orgs[3]]});
+                auto result = o.Decide({_apples[apples[0]], _apples[apples[1]], _apples[apples[2]]},
+                                       {_organisms[orgs[1]], _organisms[orgs[2]], _organisms[orgs[3]]}, _ratio/2 );
                 //auto result = o.Decide({_apples[apples[0]], _apples[apples[1]], _apples[apples[2]]}, _ratio/2 );
-                auto result = o.Decide({_apples[apples[0]]}, _ratio/2 );
+                //auto result = o.Decide({_apples[apples[0]]}, _ratio/2 );
                 if (result[0] < 0)
                     result[0] = result[0] / 10;
                 o.Step(result[0] / 100, result[1] / 33);

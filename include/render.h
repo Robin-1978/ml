@@ -49,7 +49,7 @@ namespace org
                     cv::setMouseCallback(_name, Render::_OnMouse);
                     steps++;
 
-                    if(steps > 50000)
+                    if(steps > 10000)
                     {
                         _world.NextGeneration();
                         steps = 0;
