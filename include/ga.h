@@ -55,7 +55,7 @@ namespace org
                 auto &ad = std::get<0>(dnas[a]);
                 auto &bd = std::get<0>(dnas[b]);
 
-                result.emplace_back(ad.Corssover(bd));
+                result.emplace_back(ad.Crossover(bd));
                 result.rbegin()->Mutation(0.1, 0.2);
             }
             return result;

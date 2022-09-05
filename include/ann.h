@@ -123,25 +123,25 @@ namespace org
         values operator()(const values &inputs) const
         {
             auto result = inputs;
-            //std::cout << "----------------------------------" << std::endl;
+            // std::cout << "----------------------------------" << std::endl;
             for (auto &layer : layers)
             {   
                 
-                /*
-                for(auto i = 0; i < result.size(); ++i)
-                {
-                    std::cout << " " << result[i];
-                }
-                std::cout << std::endl;
-                */
+                
+                // for(auto i = 0; i < result.size(); ++i)
+                // {
+                //     std::cout << " " << result[i];
+                // }
+                // std::cout << std::endl;
+                
                 result = layer(result);
-                /*
-                for(auto i = 0; i < result.size(); ++i)
-                {
-                    std::cout << " " << result[i];
-                }
-                std::cout << std::endl  << "" << std::endl;
-                */
+                
+                // for(auto i = 0; i < result.size(); ++i)
+                // {
+                //     std::cout << " " << result[i];
+                // }
+                // std::cout << std::endl  << "" << std::endl;
+                
             }
             //std::cout << "----------------------------------" << std::endl;
             return result;

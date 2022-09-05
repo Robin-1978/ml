@@ -64,7 +64,7 @@ namespace org
         Render()
             : _name("Defalut Name"), _width(500), _height(500),
               _image(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)), _back(_width, _height, CV_8UC3, cv::Scalar(255, 255, 255)),
-              _isBreak(false), _world(50, 100, 500), _center{_width / 2.0, _height / 2.0}, _isFast(false), _genetation{}
+              _isBreak(false), _world(50, 10, 500), _center{_width / 2.0, _height / 2.0}, _isFast(false), _genetation{}
         {
             cv::namedWindow(_name);
         }
