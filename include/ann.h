@@ -220,6 +220,25 @@ namespace org
         {
             return is;
         }
+
+        void Print(std::ostream &os) const
+        {
+            os << "Layer:" << std::endl;
+            for (auto &layer : layers)
+            {
+                os << "\tNeuron:" << std::endl;
+                for (auto &neuron : layer.neurons)
+                {
+                    os << "\t\tWeights:" << std::endl;
+                    os << "\t\t\t";
+                    for (auto &weight : neuron.weights)
+                    {
+                       os << weight <<" "; 
+                    }
+                    os << std::endl;
+                }
+            }
+        }
     };
 
 } // namespace org

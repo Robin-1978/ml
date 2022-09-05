@@ -111,8 +111,8 @@ namespace org
         Organism()
             : _score{},
               _brain{{{2, nullptr},
-                      {3, std::make_shared<org::act::Sigmod>()},
-                      {3, std::make_shared<org::act::Sigmod>()},
+                      {3, std::make_shared<org::act::Tanh>()},
+                      {3, std::make_shared<org::act::Tanh>()},
                       {2, std::make_shared<org::act::Tanh>()}}}
         {
         }
@@ -146,8 +146,8 @@ namespace org
             for (auto &f : foods)
             {
                 auto delta = f - *this;
-                v.push_back((Exceed(delta.x, limit) + limit)/2/limit);
-                v.push_back((Exceed(delta.y, limit)+limit)/2/limit);
+                v.push_back((Exceed(delta.x, limit))/limit);
+                v.push_back((Exceed(delta.y, limit))/limit);
                 // std::cout << 2 << std::endl;
             };
             return _brain(v);
@@ -193,7 +193,9 @@ namespace org
             auto ndna = ndnas.begin();
             for (auto &o : _organisms)
             {
+                //o._brain.Print(std::cout);
                 o._brain.FromDna(*ndna++);
+                //o._brain.Print(std::cout);
                 o._score = 0;
             }
             _curScore = 0;
@@ -231,7 +233,7 @@ namespace org
                 auto result = o.Decide({_apples[apples[0]]}, _ratio/2 );
                 if (result[0] < 0)
                     result[0] = result[0] / 10;
-                o.Step(result[0] / 100, result[1] / 30);
+                o.Step(result[0] / 100, result[1] / 33);
                 o.x = Exceed(o.x, _ratio / 2);
                 o.y = Exceed(o.y, _ratio / 2);
             }
