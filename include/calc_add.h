@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <fstream>
 
 #include "ann.h"
 
@@ -14,7 +15,7 @@ struct Object
         :_score{}, 
         _brain{{
             {2, nullptr},
-            {4, std::make_shared<org::act::Tanh>()},
+            //{10, std::make_shared<org::act::Tanh>()},
             {1, std::make_shared<org::act::Tanh>()}
         }}
     {
@@ -26,12 +27,13 @@ struct Object
         values v;
         for(auto &i : inputs)
         {
-            v.push_back((i/100.0 - 0.5) * 2); // Normalization
+            v.push_back((i - 50) / 50); // Normalization
         }
         auto result = _brain(v)[0];
-
-        _score += 4 - std::abs(v[0] + v[1] - result);
-        return result * 100 + 100;
+        result = result * 5000 + 5000;
+        _score += std::pow(1 - std::abs(inputs[0] * inputs[1] - result)/10000, 2);
+        return result;
+        
     }
 
     std::ostream& operator<<(std::ostream &os) const
@@ -56,10 +58,10 @@ struct Object
 class World
 {
 public:
-    World(unsigned count=50, unsigned step = 100000, unsigned epoch = 50)
-        :_objects(50), _step(step), _epoch(epoch)
+    World(unsigned count=1000, unsigned step = 100, unsigned epoch = 50)
+        :_objects(count), _step(step), _epoch(epoch)
     {
-        std::ifstream ifs("calc.data");
+        std::ifstream ifs("calc.data", std::ios_base::binary);
         if(ifs)
         {
             this->operator>>(ifs);
@@ -79,11 +81,11 @@ public:
         for(auto &o : _objects)
         {
             total += o._score;
-            std::cout << o._score << " ";
+            //std::cout << o._score << " ";
         }
-        total = total/_objects.size();
+        //total = total;
 
-        std::cout << " Mean Score:" << total << std::endl;
+        std::cout <<"Max score: " << _objects[0]._score  << " Mean Score:" << total/_objects.size() << std::endl;
 
 
         Dnas dnas;
@@ -91,15 +93,15 @@ public:
         {
             dnas.emplace_back(std::make_tuple(o._brain.ToDna(), double(o._score) / total));
         }
-            auto ndnas = Ga()(dnas, 0.1);
-            auto ndna = ndnas.begin();
-            for (auto &o : _objects)
-            {
-                //o._brain.Print(std::cout);
-                o._brain.FromDna(*ndna++);
-                //o._brain.Print(std::cout);
-                o._score = 0;
-            }
+        auto ndnas = Ga()(dnas, 0.1);
+        auto ndna = ndnas.begin();
+        for (auto &o : _objects)
+        {
+            //o._brain.Print(std::cout);
+            o._brain.FromDna(*ndna++);
+            //o._brain.Print(std::cout);
+            o._score = 0;
+        }
     }
 
     void Train()
@@ -120,7 +122,7 @@ public:
             NextGeneration();
         }
 
-        std::ofstream ofs("calc.data");
+        std::ofstream ofs("calc.data", std::ios_base::binary);
         if(ofs)
         {
             this->operator<<(ofs);
@@ -138,9 +140,6 @@ public:
     std::ostream& operator<<(std::ostream &os) const
     {
 
-        os.write(reinterpret_cast<const char *>(&_epoch), sizeof(_epoch));
-        os.write(reinterpret_cast<const char *>(&_step), sizeof(_step));
-
         std::size_t size = _objects.size();
         os.write(reinterpret_cast<char *>(&size), sizeof(size));
 
@@ -154,12 +153,9 @@ public:
 
     std::istream& operator>>(std::istream &is)
     {
-
-        is.read(reinterpret_cast<char *>(&_epoch), sizeof(_epoch));
-        is.read(reinterpret_cast<char *>(&_step), sizeof(_step));
-
         std::size_t size{};
         is.read(reinterpret_cast<char *>(&size), sizeof(size));
+        _objects.resize(size);
         for (auto &o : _objects)
         {
             o.operator>>(is);

@@ -101,8 +101,8 @@ namespace org
             {
 
                 auto input = std::get<0>(*i++);
-                std::cout << "I" << input << std::endl;
-                std::cout << "O" << std::get<0>(*i) << std::endl;
+                //std::cout << "I" << input << std::endl;
+                //std::cout << "O" << std::get<0>(*i) << std::endl;
 
                 AddLayer(input, std::get<0>(*i), std::get<1>(*i));
             }

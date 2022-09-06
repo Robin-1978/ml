@@ -43,6 +43,7 @@ namespace org
         {
             std::vector<dna> result;
             int count = std::ceil(dnas.size() * percent);
+            count = 1;
             for(int i=0; i < count; i++)
             {
                 result.push_back(std::get<0>(dnas[i]));

@@ -180,20 +180,16 @@ namespace org
             std::sort(_organisms.begin(), _organisms.end(), [this](const Organism &a, const Organism &b) -> bool
                       { return a._score > b._score; });
             _lastScore = _organisms[0]._score;
+            double total{};
             for(auto &o : _organisms)
             {
                 _lastMeanScore += o._score;
+                total += o._score;
                 std::cout << o._score << " ";
             }
             _lastMeanScore = _lastMeanScore/_organisms.size();
 
-            std::cout << " Mean Score:" << _lastMeanScore << std::endl;
-            double total{};
-
-            for (auto &o : _organisms)
-            {
-                total += o._score;
-            }
+            std::cout << " Mean Score:" << _lastMeanScore /_organisms.size()<< std::endl;
 
             Dnas dnas;
             for (auto &o : _organisms)
