@@ -9,7 +9,7 @@
 
 void Test1()
 {
-    org::Network net({{2, nullptr}, {3, std::make_shared<org::act::Tanh>()}, {1, std::make_shared<org::act::Tanh>()}});
+    //org::Network net({{2, nullptr}, {3, std::make_shared<org::act::Tanh>()}, {1, std::make_shared<org::act::Tanh>()}});
     //org::Render::Instance()->Init("Demo", 1000, 1000);
 
     org::Render::Instance()->Run();
@@ -32,6 +32,6 @@ void Test2()
 int main(int argc, char *argv[])
 {
 
-    Test2();
+    Test1();
     return 0;
 }

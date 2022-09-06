@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <execution>
-
+#include <fstream>
 #include "coords.h"
 #include "ann.h"
 #include "random.h"
@@ -156,6 +156,21 @@ namespace org
             };
             return _brain(v);
         }
+
+        std::ostream& operator<<(std::ostream &os) const
+        {
+            _brain.ToDna().operator<<(os);
+
+            return os;
+        }
+
+        std::istream& operator>>(std::istream &is)
+        {
+            dna dna;
+            dna.operator>>(is);
+            _brain.FromDna(dna);
+            return is;
+        }        
         unsigned _score;
         org::Network _brain;
     };
@@ -173,10 +188,48 @@ namespace org
             {
                 a.Random(ratio / 2);
             }
+
+            std::ifstream ifs("org.data", std::ios_base::binary);
+            if(ifs)
+            {
+                this->operator>>(ifs);
+            }
+
         }
 
+        std::ostream& operator<<(std::ostream &os) const
+        {
+
+            std::size_t size = _organisms.size();
+            os.write(reinterpret_cast<char *>(&size), sizeof(size));
+
+            for (const auto &o : _organisms)
+            {
+                o.operator<<(os);
+            }
+            return os;
+
+        }
+
+        std::istream& operator>>(std::istream &is)
+        {
+            std::size_t size{};
+            is.read(reinterpret_cast<char *>(&size), sizeof(size));
+            _organisms.resize(size);
+            for (auto &o : _organisms)
+            {
+                o.operator>>(is);
+            }
+            return is;
+
+        }     
         void NextGeneration()
         {
+            std::ofstream ofs("org.data", std::ios_base::binary);
+            if(ofs)
+            {
+                this->operator<<(ofs);
+            }
             std::sort(_organisms.begin(), _organisms.end(), [this](const Organism &a, const Organism &b) -> bool
                       { return a._score > b._score; });
             _lastScore = _organisms[0]._score;
@@ -189,7 +242,7 @@ namespace org
             }
             _lastMeanScore = _lastMeanScore/_organisms.size();
 
-            std::cout << " Mean Score:" << _lastMeanScore /_organisms.size()<< std::endl;
+            std::cout << " Mean Score:" << _lastMeanScore << std::endl;
 
             Dnas dnas;
             for (auto &o : _organisms)
