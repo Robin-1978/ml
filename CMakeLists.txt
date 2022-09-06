@@ -15,8 +15,10 @@ set(CMAKE_CXX_STANDARD 17)
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+find_package(TBB REQUIRED)
+endif()
 
-#find_package(TBB REQUIRED)
 
 include_directories(include)
 file(GLOB SOURCES "src/*.cc")
@@ -30,4 +32,8 @@ FetchContent_Declare(fmt
 )
 FetchContent_MakeAvailable(fmt)
 
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} fmt tbb)
+else()
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} fmt)
+endif()
