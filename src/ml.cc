@@ -32,6 +32,6 @@ void Test2()
 int main(int argc, char *argv[])
 {
 
-    Test1();
+    Test2();
     return 0;
 }

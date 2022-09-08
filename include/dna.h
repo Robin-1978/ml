@@ -77,7 +77,18 @@ namespace org
             return is;
         }
     };
+    template <typename T>
+    std::ostream &operator<<(std::ostream &os, const basic_dna<T>& d)
+    {
+        return d.operator<<(os);
+    }
 
+    template <typename T>
+    std::istream &operator<<(std::istream &is, basic_dna<T>& d)
+    {
+        return d.operator>>(is);
+    }
+    
     using dna = basic_dna<double>;
     using fdna = basic_dna<float>;
 } // end org namespace

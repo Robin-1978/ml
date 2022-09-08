@@ -14,7 +14,21 @@ namespace org
             {
                 return Calc(x);
             }
+
             using ptr = std::shared_ptr<Activate>;
+        };
+
+        struct Purelin : public Activate
+        {
+            double Calc(double x) override
+            {
+                return x;
+            }
+
+            double Loss(double y) override
+            {
+                return 1;
+            }
         };
 
         struct Tanh : public Activate
@@ -51,7 +65,7 @@ namespace org
             }
             double Loss(double y) override
             {
-                return 0;
+                return y < 0 ? 0 : 1;
             }
         };
 
@@ -69,7 +83,7 @@ namespace org
 
             double Loss(double y) override
             {
-                return 0;
+                return y < 0 ? a : 1;
             }
         };
 
@@ -111,10 +125,14 @@ namespace org
         struct Softmax : public Activate
         {
             double sum;
-            Softmax(double sum) : sum(sum) {}
-
-            Softmax(std::initializer_list<double> args)
+            void Sum(double sum)
             {
+                this->sum = sum;
+            }
+
+            void Sum(std::initializer_list<double> args)
+            {
+                sum = {};
                 for (auto n : args)
                 {
                     sum += std::exp(n);

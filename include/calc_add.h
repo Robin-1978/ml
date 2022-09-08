@@ -15,7 +15,7 @@ struct Object
         :_score{}, 
         _brain{{
             {2, nullptr},
-            //{10, std::make_shared<org::act::Tanh>()},
+            {10, std::make_shared<org::act::Tanh>()},
             {1, std::make_shared<org::act::Tanh>()}
         }}
     {
@@ -31,7 +31,7 @@ struct Object
         }
         auto result = _brain(v)[0];
         result = result * 5000 + 5000;
-        _score += std::pow(1 - std::abs(inputs[0] * inputs[1] - result)/10000, 2);
+        _score += std::exp(2 - std::abs(inputs[0] * inputs[1] - result)/2500); // -4 ~ 2
         return result;
         
     }
