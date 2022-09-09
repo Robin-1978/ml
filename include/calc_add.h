@@ -168,4 +168,75 @@ private:
     unsigned _step, _epoch;
 };
 
+class Gradient
+{
+public:
+ Gradient(unsigned count=1000, unsigned epoch = 50)
+        :_count(count), _epoch(epoch)
+    {
+        std::ifstream ifs("calc.data", std::ios_base::binary);
+        if(ifs)
+        {
+            this->operator>>(ifs);
+        }
+    }
+    void Train()
+    {   
+        matrix inputs(_count, values(2));
+        matrix label(_count, values(1));
+
+        for(auto n=0; n < _count; ++n)
+        {
+            auto a = Random::Instance().IntInRange(0, 100);
+            auto b = Random::Instance().IntInRange(0, 100);
+            auto c = a * b;
+            inputs[n][0] = a;
+            inputs[n][1] = b;
+            label[n][0] = c;
+
+        }
+
+        for(auto e = 0; e < _epoch; ++e)
+        {
+
+            //_object
+            auto delta = _object._brain.Clone();
+            auto error = _object._brain.BatchBackward(inputs, label, delta);
+            _object._brain.Adjust(delta, _count);
+            std::cout << "Epo:" << e << " Error:" << error <<std::endl;
+        }
+
+        std::ofstream ofs("calc.data", std::ios_base::binary);
+        if(ofs)
+        {
+            this->operator<<(ofs);
+        }
+    }
+
+    double operator()(double a, double b)
+    {
+        values v;
+        v.push_back(a);
+        v.push_back(b);
+        return _object(v);
+    }
+
+    std::istream& operator>>(std::istream &is)
+    {
+        _object.operator>>(is);
+        return is;
+
+    }
+    std::ostream& operator<<(std::ostream &os) const
+    {
+        _object.operator<<(os);
+        return os;
+    }
+
+private:
+    Object _object;
+
+    unsigned _count, _epoch;
+};
+
 }}

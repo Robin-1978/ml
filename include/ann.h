@@ -274,20 +274,56 @@ namespace org
             return result;
         }
 
-        void Backword(const values &labels, const matrix &result, Network &delta)
+        double Backward(const values &labels, const matrix &result, Network &delta) const
         {
             auto errors = *result.rbegin() - labels;
             // Loop layers from last to first
             for (auto l = result.size() - 2; l > 0; l--)
-            {
-                for (auto n = 0; n < delta.layers[l].neurons.size(); n++)
+            {   
+                values tmpErrors(result[l].size());
+                for (auto n = 0; n < layers[l].neurons.size(); n++)
                 {
                     auto error = layers[l].activate->Loss(result[l + 1][n]) * errors[n];
                     delta.layers[l].neurons[n].bias += error;
                     for (auto w = 0; w < delta.layers[l].neurons[n].weights.size(); ++n)
                     {
                         delta.layers[l].neurons[n].weights[w] += result[l][w] * error;
+                        tmpErrors[w] += layers[l].neurons[n].weights[w] * error;
                     }
+                }
+                errors = tmpErrors;
+            }
+
+            double error{};
+            for(auto e : errors)
+            {
+                error += e * e;
+            }
+            return error;
+        }
+
+        double BatchBackward(const matrix &inputs, const matrix &lables, Network &delta) const
+        {
+            double error;
+            for(auto i = 0; i < inputs.size(); ++i)
+            {
+                auto outputs = Forward(inputs[i]);
+                error += Backward(lables[i], outputs, delta);
+            }
+            return error / inputs.size();
+        }
+
+        void Adjust(Network & delta, unsigned size)
+        {
+            for(auto l=0; l < layers.size(); ++l)
+            {
+                for(auto n=0; n < layers[l].neurons.size(); ++n)
+                {
+                    for(auto w=0; w<layers[l].neurons[n].weights.size(); ++w)
+                    {
+                        layers[l].neurons[n].weights[w]+= delta[l].neurons[n].weights[w] / size;
+                    }
+                    layers[l].neurons[n].bias += delta[l].neurons[n].bias / size;
                 }
             }
         }
