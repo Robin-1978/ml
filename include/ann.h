@@ -292,7 +292,7 @@ namespace org
             }
 
             double error{};
-            for(auto e : errors)
+            for(auto e : (*result.rbegin() - labels))
             {
                 error += e * e;
             }
@@ -301,7 +301,7 @@ namespace org
 
         double BatchBackward(const matrix &inputs, const matrix &lables, Network &delta) const
         {
-            double error;
+            double error{};
             for(auto i = 0; i < inputs.size(); ++i)
             {
                 auto outputs = Forward(inputs[i]);
@@ -318,9 +318,9 @@ namespace org
                 {
                     for(auto w=0; w<layers[l].neurons[n].weights.size(); ++w)
                     {
-                        layers[l].neurons[n].weights[w]+= delta[l].neurons[n].weights[w] / size;
+                        layers[l].neurons[n].weights[w] -= delta[l].neurons[n].weights[w] / size;
                     }
-                    layers[l].neurons[n].bias += delta[l].neurons[n].bias / size;
+                    layers[l].neurons[n].bias -= delta[l].neurons[n].bias / size;
                 }
             }
         }
