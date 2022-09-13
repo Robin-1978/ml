@@ -18,7 +18,7 @@ namespace org
 
     values operator-(const values &a, const values &b)
     {
-        throw std::invalid_argument("operator   -  count of values must be same");
+        if(a.size() != b.size()) throw std::invalid_argument("operator   -  count of values must be same");
         values res;
         for (auto i = 0; i < a.size(); ++i)
         {
@@ -29,7 +29,6 @@ namespace org
 
     values operator+(const values &a, const values &b)
     {
-        throw std::invalid_argument("operator + count of values must be same");
         values res;
         for (auto i = 0; i < a.size(); ++i)
         {
@@ -38,20 +37,18 @@ namespace org
         return res;
     }
 
-    values operator*(const values &a, const values &b)
+    values operator*(const values &a,  double b)
     {
-        throw std::invalid_argument("operator * count of values must be same");
         values res;
         for (auto i = 0; i < a.size(); ++i)
         {
-            res.push_back(a[i] * b[i]);
+            res.push_back(a[i] * b);
         }
         return res;
     }
 
     values operator/(const values &a, const values &b)
     {
-        throw std::invalid_argument("operator / count of values must be same");
         values res;
         for (auto i = 0; i < a.size(); ++i)
         {
@@ -276,16 +273,16 @@ namespace org
 
         double Backward(const values &labels, const matrix &result, Network &delta) const
         {
-            auto errors = *result.rbegin() - labels;
+            auto errors = (*result.rbegin() - labels);
             // Loop layers from last to first
-            for (auto l = result.size() - 2; l > 0; l--)
+            for (int l = result.size() - 2; l >= 0; l--)
             {   
                 values tmpErrors(result[l].size());
                 for (auto n = 0; n < layers[l].neurons.size(); n++)
                 {
                     auto error = layers[l].activate->Loss(result[l + 1][n]) * errors[n];
                     delta.layers[l].neurons[n].bias += error;
-                    for (auto w = 0; w < delta.layers[l].neurons[n].weights.size(); ++n)
+                    for (auto w = 0; w < delta.layers[l].neurons[n].weights.size(); w++)
                     {
                         delta.layers[l].neurons[n].weights[w] += result[l][w] * error;
                         tmpErrors[w] += layers[l].neurons[n].weights[w] * error;

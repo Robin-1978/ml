@@ -171,10 +171,10 @@ private:
 class Gradient
 {
 public:
- Gradient(unsigned count=1000, unsigned epoch = 50)
+ Gradient(unsigned count=1000, unsigned epoch = 1000)
         :_count(count), _epoch(epoch)
     {
-        std::ifstream ifs("calc.data", std::ios_base::binary);
+        std::ifstream ifs("calc_g.data", std::ios_base::binary);
         if(ifs)
         {
             this->operator>>(ifs);
@@ -190,9 +190,9 @@ public:
             auto a = Random::Instance().IntInRange(0, 100);
             auto b = Random::Instance().IntInRange(0, 100);
             auto c = a * b;
-            inputs[n][0] = a;
-            inputs[n][1] = b;
-            label[n][0] = c;
+            inputs[n][0] = a /  100.0;
+            inputs[n][1] = b / 100.0;
+            label[n][0] = c / 10000.0; // normalized inputs
 
         }
 
@@ -206,7 +206,7 @@ public:
             std::cout << "Epo:" << e << " Error:" << error <<std::endl;
         }
 
-        std::ofstream ofs("calc.data", std::ios_base::binary);
+        std::ofstream ofs("calc_g.data", std::ios_base::binary);
         if(ofs)
         {
             this->operator<<(ofs);

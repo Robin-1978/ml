@@ -29,9 +29,22 @@ void Test2()
 
 }
 
+void Test3()
+{
+    org::Calc::Gradient world;
+    world.Train();
+    for(;;)
+    {
+        double a, b;
+        std::cin >> a >> b;
+        std::cout << world(a, b) << std::endl;
+
+    }
+
+}
 int main(int argc, char *argv[])
 {
 
-    Test2();
+    Test3();
     return 0;
 }
